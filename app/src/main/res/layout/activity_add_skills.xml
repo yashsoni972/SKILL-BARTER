@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_light"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Top Bar -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_logo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Add Skills"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_rounded_card"
+        app:tabIndicatorColor="@color/primary"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabTextColor="@color/text_secondary">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I Can Teach" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I Want to Learn" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/layoutSkillOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <CheckBox
+                android:id="@+id/cbHtml"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="HTML &amp; CSS"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbJs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="JavaScript"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbPython"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Python"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbReact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="React"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbGraphicDesign"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Graphic Design"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbVideoEditing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Video Editing"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/cbUiUx"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="UI/UX"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/etCustomSkill"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_rounded_card"
+                android:hint="Add custom skill name..."
+                android:inputType="text"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnSave"
+        style="@style/Widget.SkillBarter.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Save" />
+
+</LinearLayout>
