@@ -11,7 +11,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://10.0.2.2:5000/api/"; // Node.js local emulator URL
+    private static final String BASE_URL = "https://skillbarter-api-m0ev.onrender.com/api/";
     private static ApiService apiService;
 
     public static ApiService getService(Context context) {
