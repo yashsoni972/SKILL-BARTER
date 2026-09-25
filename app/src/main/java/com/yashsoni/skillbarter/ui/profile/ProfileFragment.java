@@ -17,6 +17,7 @@ import com.google.android.material.chip.Chip;
 import com.yashsoni.skillbarter.R;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentProfileBinding;
+import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.auth.LoginActivity;
 import com.yashsoni.skillbarter.ui.skills.AddSkillsActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
@@ -27,6 +28,7 @@ public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
     private SessionManager sessionManager;
+    private SkillBarterRepository repository;
 
     @Nullable
     @Override
@@ -40,6 +42,7 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         sessionManager = new SessionManager(requireContext());
+        repository = SkillBarterRepository.getInstance(requireContext());
 
         loadUserData();
 
@@ -116,6 +119,17 @@ public class ProfileFragment extends Fragment {
             if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
                 binding.ivAvatar.setImageResource(getAvatarResource(user.getProfileImage()));
             }
+
+            int offeredCount = (user.getOfferedSkills() != null) ? user.getOfferedSkills().size() : 0;
+            int wantedCount = (user.getWantedSkills() != null) ? user.getWantedSkills().size() : 0;
+            int totalSkills = offeredCount + wantedCount;
+
+            int totalRequests = repository.getIncomingRequests().size() + repository.getOutgoingRequests().size();
+            int totalCompleted = user.getTotalExchanges();
+
+            binding.tvSkillsStat.setText(String.valueOf(totalSkills));
+            binding.tvRequestsStat.setText(String.valueOf(totalRequests));
+            binding.tvCompletedStat.setText(String.valueOf(totalCompleted));
 
             binding.chipGroupOffered.removeAllViews();
             List<String> offered = user.getOfferedSkills();
