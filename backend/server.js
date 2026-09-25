@@ -18,11 +18,15 @@ app.use('/api/sessions', require('./routes/sessionRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to Skill Barter REST API Server. Exchange Skills, Not Money!' });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Skill Barter API Server is running!' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/skillbarter';
 
 mongoose.connect(MONGO_URI)
