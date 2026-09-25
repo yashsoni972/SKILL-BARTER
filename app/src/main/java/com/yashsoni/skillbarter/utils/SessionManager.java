@@ -44,16 +44,7 @@ public class SessionManager {
         if (json != null) {
             return gson.fromJson(json, User.class);
         }
-        // Default seed user fallback
-        User defaultUser = new User("user_101", "Yash Soni", "yash@example.com", "Anand, Gujarat",
-                "Passionate about web development, design and learning new technologies.", 4.7, 3);
-        defaultUser.getOfferedSkills().add("HTML & CSS");
-        defaultUser.getOfferedSkills().add("JavaScript");
-        defaultUser.getOfferedSkills().add("Python");
-        defaultUser.getWantedSkills().add("Graphic Design");
-        defaultUser.getWantedSkills().add("UI/UX");
-        defaultUser.getWantedSkills().add("Video Editing");
-        return defaultUser;
+        return null;
     }
 
     public void updateUser(User user) {
