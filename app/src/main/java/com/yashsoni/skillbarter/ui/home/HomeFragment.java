@@ -17,6 +17,7 @@ import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentHomeBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
+import com.yashsoni.skillbarter.ui.notifications.NotificationsActivity;
 import com.yashsoni.skillbarter.ui.requests.SendRequestActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
@@ -42,9 +43,37 @@ public class HomeFragment extends Fragment {
         repository = SkillBarterRepository.getInstance(requireContext());
         sessionManager = new SessionManager(requireContext());
 
+        loadHomeData();
+
+        binding.ivNotification.setOnClickListener(v -> {
+            startActivity(new Intent(requireContext(), NotificationsActivity.class));
+        });
+
+        binding.etSearchTrigger.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).selectBottomTab(R.id.nav_search);
+            }
+        });
+
+        binding.tvSeeAll.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).selectBottomTab(R.id.nav_search);
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadHomeData();
+    }
+
+    private void loadHomeData() {
         User currentUser = sessionManager.getUser();
-        if (currentUser != null && currentUser.getName() != null) {
+        if (currentUser != null && currentUser.getName() != null && !currentUser.getName().isEmpty()) {
             binding.tvGreeting.setText("Hello, " + currentUser.getName().split(" ")[0] + " 👋");
+        } else {
+            binding.tvGreeting.setText("Hello, Skill Barterer 👋");
         }
 
         Stats stats = repository.getStats();
@@ -61,18 +90,6 @@ public class HomeFragment extends Fragment {
 
         binding.rvRecommended.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvRecommended.setAdapter(adapter);
-
-        binding.etSearchTrigger.setOnClickListener(v -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).selectBottomTab(R.id.nav_search);
-            }
-        });
-
-        binding.tvSeeAll.setOnClickListener(v -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).selectBottomTab(R.id.nav_search);
-            }
-        });
     }
 
     @Override

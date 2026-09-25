@@ -26,6 +26,9 @@ public class SplashActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
 
+        android.view.animation.Animation anim = android.view.animation.AnimationUtils.loadAnimation(this, com.yashsoni.skillbarter.R.anim.splash_scale);
+        binding.ivLogo.startAnimation(anim);
+
         binding.btnGetStarted.setOnClickListener(v -> navigateNext());
 
         // Auto transition after 2 seconds
