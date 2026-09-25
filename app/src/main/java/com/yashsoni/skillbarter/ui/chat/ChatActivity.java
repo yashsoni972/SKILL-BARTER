@@ -2,8 +2,8 @@ package com.yashsoni.skillbarter.ui.chat;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -31,14 +31,23 @@ public class ChatActivity extends AppCompatActivity {
 
         repository = SkillBarterRepository.getInstance(this);
 
-        partnerUser = (User) getIntent().getSerializableExtra("partnerUser");
+        if (getIntent() != null && getIntent().hasExtra("partnerUser")) {
+            partnerUser = (User) getIntent().getSerializableExtra("partnerUser");
+        }
         if (partnerUser == null) {
-            partnerUser = new User("u1", "Riya Sharma", "riya@example.com", "Ahmedabad", "UI/UX Designer", 4.8, 5);
+            partnerUser = new User("u1", "Skill Barterer", "user@example.com", "Location", "Skill Exchange Member", 5.0, 1);
         }
 
         binding.tvUserName.setText(partnerUser.getName());
 
-        binding.ivBack.setOnClickListener(v -> finish());
+        binding.ivBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
 
         messageList = repository.getMessagesForPartner(partnerUser.getId());
         adapter = new MessageAdapter(messageList);
