@@ -38,6 +38,7 @@ public class RequestsFragment extends Fragment {
 
         repository = SkillBarterRepository.getInstance(requireContext());
 
+        updateTabTitles();
         loadRequests(true);
 
         binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -54,6 +55,27 @@ public class RequestsFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateTabTitles();
+        if (binding != null && binding.tabLayout != null) {
+            loadRequests(binding.tabLayout.getSelectedTabPosition() == 0);
+        }
+    }
+
+    private void updateTabTitles() {
+        int incomingCount = repository.getIncomingRequests().size();
+        int outgoingCount = repository.getOutgoingRequests().size();
+
+        if (binding.tabLayout.getTabAt(0) != null) {
+            binding.tabLayout.getTabAt(0).setText("Received (" + incomingCount + ")");
+        }
+        if (binding.tabLayout.getTabAt(1) != null) {
+            binding.tabLayout.getTabAt(1).setText("Sent (" + outgoingCount + ")");
+        }
+    }
+
     private void loadRequests(boolean isIncoming) {
         List<ExchangeRequest> list = isIncoming ? repository.getIncomingRequests() : repository.getOutgoingRequests();
 
@@ -68,6 +90,7 @@ public class RequestsFragment extends Fragment {
                     intent.putExtra("partnerUser", request.getSenderId());
                 }
                 startActivity(intent);
+                updateTabTitles();
                 loadRequests(true);
             }
 
@@ -75,6 +98,7 @@ public class RequestsFragment extends Fragment {
             public void onReject(ExchangeRequest request) {
                 repository.rejectRequest(request.getId());
                 Toast.makeText(requireContext(), "Exchange Request Rejected", Toast.LENGTH_SHORT).show();
+                updateTabTitles();
                 loadRequests(true);
             }
         });
