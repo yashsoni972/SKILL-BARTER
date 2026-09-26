@@ -1,8 +1,10 @@
 package com.yashsoni.skillbarter.api;
 
 import com.yashsoni.skillbarter.data.model.AuthResponse;
-import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.Availability;
+import com.yashsoni.skillbarter.data.model.Badge;
+import com.yashsoni.skillbarter.data.model.Credit;
+import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.HelpRequest;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
@@ -111,4 +113,10 @@ public interface ApiService {
 
     @POST("availability")
     Call<Availability> addAvailability(@Body Map<String, String> body);
+
+    @GET("credits")
+    Call<Credit> getCredits();
+
+    @GET("badges")
+    Call<List<Badge>> getBadges();
 }

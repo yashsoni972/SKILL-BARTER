@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_light">
+    android:background="@color/bg_light"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -52,7 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Yash Soni"
+            android:text="Skill Barter Member"
             android:textColor="@color/text_primary"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -62,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="yash@example.com"
+            android:text="user@example.com"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
@@ -75,12 +76,43 @@
             android:textColor="@color/text_muted"
             android:textSize="13sp" />
 
+        <!-- Quick Ecosystem Actions: Credits & Progress -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCredits"
+                style="@style/Widget.SkillBarter.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:paddingVertical="0dp"
+                android:text="💎 40 Credits"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnProgress"
+                style="@style/Widget.SkillBarter.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:paddingVertical="0dp"
+                android:text="📊 My Progress"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
         <!-- Bio Card -->
         <TextView
             android:id="@+id/tvUserBio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:background="@drawable/bg_rounded_card"
             android:gravity="center"
             android:padding="14dp"
@@ -93,7 +125,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/bg_rounded_card"
             android:orientation="horizontal"
             android:padding="16dp">
@@ -109,7 +141,7 @@
                     android:id="@+id/tvSkillsStat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="3"
+                    android:text="0"
                     android:textColor="@color/primary"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -139,7 +171,7 @@
                     android:id="@+id/tvRequestsStat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2"
+                    android:text="0"
                     android:textColor="@color/accent_blue"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -169,7 +201,7 @@
                     android:id="@+id/tvCompletedStat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"
+                    android:text="0"
                     android:textColor="@color/accent_green"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -185,11 +217,36 @@
 
         </LinearLayout>
 
+        <!-- Achievements & Badges Section -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:text="🏆 Achievements &amp; Badges"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvBadges"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
         <!-- Offered Skills Header -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
