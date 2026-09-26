@@ -13,12 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.android.material.chip.Chip;
 import com.yashsoni.skillbarter.R;
+import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentDiscoverBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
-import com.yashsoni.skillbarter.ui.home.UserAdapter;
 import com.yashsoni.skillbarter.ui.requests.SendRequestActivity;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class DiscoverFragment extends Fragment {
 
         repository = SkillBarterRepository.getInstance(requireContext());
 
-        loadUsers("");
+        filterSearch();
 
         binding.etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -75,28 +74,43 @@ public class DiscoverFragment extends Fragment {
 
     private void filterSearch() {
         String query = binding.etSearch.getText().toString();
-        if (!selectedCategory.isEmpty()) {
-            query = query.isEmpty() ? selectedCategory : query + " " + selectedCategory;
-        }
-        loadUsers(query);
-    }
+        repository.fetchDiscoverMatches(query, selectedCategory, "", new SkillBarterRepository.DataCallback<List<MatchResult>>() {
+            @Override
+            public void onSuccess(List<MatchResult> matches) {
+                if (binding == null) return;
+                if (matches == null || matches.isEmpty()) {
+                    binding.tvResultsCount.setText("No matching skill partners found yet.");
+                } else {
+                    binding.tvResultsCount.setText("🔥 " + matches.size() + " Perfect Skill Matches Found");
+                }
 
-    private void loadUsers(String query) {
-        List<User> results = repository.searchUsers(query);
-        if (results.isEmpty()) {
-            binding.tvResultsCount.setText("No matching skill partners found yet.");
-        } else {
-            binding.tvResultsCount.setText("Found " + results.size() + " matching partner" + (results.size() > 1 ? "s" : ""));
-        }
+                MatchAdapter adapter = new MatchAdapter(matches, new MatchAdapter.OnMatchActionListener() {
+                    @Override
+                    public void onViewProfile(User user) {
+                        Intent intent = new Intent(requireContext(), SendRequestActivity.class);
+                        intent.putExtra("targetUser", user);
+                        startActivity(intent);
+                    }
 
-        UserAdapter adapter = new UserAdapter(results, user -> {
-            Intent intent = new Intent(requireContext(), SendRequestActivity.class);
-            intent.putExtra("targetUser", user);
-            startActivity(intent);
+                    @Override
+                    public void onExchange(User user) {
+                        Intent intent = new Intent(requireContext(), SendRequestActivity.class);
+                        intent.putExtra("targetUser", user);
+                        startActivity(intent);
+                    }
+                });
+
+                binding.rvSearchResults.setLayoutManager(new LinearLayoutManager(requireContext()));
+                binding.rvSearchResults.setAdapter(adapter);
+            }
+
+            @Override
+            public void onError(String message) {
+                if (binding != null) {
+                    binding.tvResultsCount.setText("Showing matching skill partners");
+                }
+            }
         });
-
-        binding.rvSearchResults.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvSearchResults.setAdapter(adapter);
     }
 
     @Override

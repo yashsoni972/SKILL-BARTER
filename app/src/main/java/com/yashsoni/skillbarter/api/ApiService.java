@@ -2,6 +2,7 @@ package com.yashsoni.skillbarter.api;
 
 import com.yashsoni.skillbarter.data.model.AuthResponse;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
+import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
 import com.yashsoni.skillbarter.data.model.Notification;
 import com.yashsoni.skillbarter.data.model.Review;
@@ -43,6 +44,13 @@ public interface ApiService {
 
     @GET("users/recommended")
     Call<List<User>> getRecommendedPartners();
+
+    @GET("discover/users")
+    Call<List<MatchResult>> getDiscoverUsers(
+            @Query("skill") String skill,
+            @Query("category") String category,
+            @Query("location") String location
+    );
 
     @POST("skills/batch")
     Call<Map<String, String>> updateSkillsBatch(@Body Map<String, List<String>> body);

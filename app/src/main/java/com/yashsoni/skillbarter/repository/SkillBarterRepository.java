@@ -4,10 +4,13 @@ import android.content.Context;
 import com.yashsoni.skillbarter.api.ApiClient;
 import com.yashsoni.skillbarter.api.ApiService;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
+import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
+import com.yashsoni.skillbarter.data.model.Skill;
 import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SkillMatchEngine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,6 +147,61 @@ public class SkillBarterRepository {
                 callback.onSuccess(getRecommendedUsers());
             }
         });
+    }
+
+    public void fetchDiscoverMatches(String skill, String category, String location, DataCallback<List<MatchResult>> callback) {
+        apiService.getDiscoverUsers(skill, category, location).enqueue(new Callback<List<MatchResult>>() {
+            @Override
+            public void onResponse(Call<List<MatchResult>> call, Response<List<MatchResult>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onSuccess(getMatchResults(skill));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MatchResult>> call, Throwable t) {
+                callback.onSuccess(getMatchResults(skill));
+            }
+        });
+    }
+
+    public List<MatchResult> getMatchResults(String query) {
+        User currentUser = sessionManager.getUser();
+        List<User> searchList = searchUsers(query);
+        List<MatchResult> results = new ArrayList<>();
+
+        for (User u : searchList) {
+            MatchResult res = new MatchResult();
+            res.setId(u.getId());
+            res.setName(u.getName());
+            res.setEmail(u.getEmail());
+            res.setLocation(u.getLocation());
+            res.setBio(u.getBio());
+            res.setRating(u.getRating());
+            res.setProfileImage(u.getProfileImage());
+
+            List<Skill> offerSkills = new ArrayList<>();
+            if (u.getOfferedSkills() != null) {
+                for (String s : u.getOfferedSkills()) { offerSkills.add(new Skill(s, "General", "offer", "Intermediate")); }
+            }
+            res.setOffers(offerSkills);
+
+            List<Skill> wantSkills = new ArrayList<>();
+            if (u.getWantedSkills() != null) {
+                for (String s : u.getWantedSkills()) { wantSkills.add(new Skill(s, "General", "want", "Beginner")); }
+            }
+            res.setWants(wantSkills);
+
+            int matchPct = SkillMatchEngine.calculateMatchPercentage(currentUser, u);
+            res.setMatchPercentage(matchPct);
+
+            results.add(res);
+        }
+
+        results.sort((a, b) -> Integer.compare(b.getMatchPercentage(), a.getMatchPercentage()));
+        return results;
     }
 
     public List<User> getRecommendedUsers() {

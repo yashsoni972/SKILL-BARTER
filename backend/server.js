@@ -17,6 +17,7 @@ app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/sessions', require('./routes/sessionRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/discover', require('./routes/discoverRoutes'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Skill Barter REST API Server. Exchange Skills, Not Money!' });
