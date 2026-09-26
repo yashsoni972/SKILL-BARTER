@@ -68,6 +68,15 @@
         <activity
             android:name=".ui.notifications.NotificationsActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.marketplace.MarketplaceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.helprequests.HelpRequestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.availability.AvailabilityActivity"
+            android:exported="false" />
 
     </application>
 

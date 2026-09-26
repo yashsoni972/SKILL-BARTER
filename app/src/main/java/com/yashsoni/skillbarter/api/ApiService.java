@@ -2,11 +2,14 @@ package com.yashsoni.skillbarter.api;
 
 import com.yashsoni.skillbarter.data.model.AuthResponse;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
+import com.yashsoni.skillbarter.data.model.Availability;
+import com.yashsoni.skillbarter.data.model.HelpRequest;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
 import com.yashsoni.skillbarter.data.model.Notification;
 import com.yashsoni.skillbarter.data.model.Review;
 import com.yashsoni.skillbarter.data.model.Session;
+import com.yashsoni.skillbarter.data.model.SkillListing;
 import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 
@@ -90,4 +93,22 @@ public interface ApiService {
 
     @GET("notifications")
     Call<List<Notification>> getNotifications();
+
+    @GET("marketplace")
+    Call<List<SkillListing>> getMarketplaceListings();
+
+    @POST("marketplace/listings")
+    Call<SkillListing> createMarketplaceListing(@Body Map<String, Object> body);
+
+    @GET("help-requests")
+    Call<List<HelpRequest>> getHelpRequests();
+
+    @POST("help-requests")
+    Call<HelpRequest> createHelpRequest(@Body Map<String, String> body);
+
+    @GET("availability/{userId}")
+    Call<List<Availability>> getAvailability(@Path("userId") String userId);
+
+    @POST("availability")
+    Call<Availability> addAvailability(@Body Map<String, String> body);
 }

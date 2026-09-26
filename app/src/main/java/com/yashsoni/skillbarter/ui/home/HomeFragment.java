@@ -17,6 +17,8 @@ import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentHomeBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
+import com.yashsoni.skillbarter.ui.helprequests.HelpRequestActivity;
+import com.yashsoni.skillbarter.ui.marketplace.MarketplaceActivity;
 import com.yashsoni.skillbarter.ui.notifications.NotificationsActivity;
 import com.yashsoni.skillbarter.ui.requests.SendRequestActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
@@ -47,6 +49,10 @@ public class HomeFragment extends Fragment {
 
         binding.ivNotification.setOnClickListener(v -> {
             startActivity(new Intent(requireContext(), NotificationsActivity.class));
+        });
+
+        binding.tvSeeAll.setOnClickListener(v -> {
+            startActivity(new Intent(requireContext(), MarketplaceActivity.class));
         });
 
         binding.etSearchTrigger.setOnClickListener(v -> {

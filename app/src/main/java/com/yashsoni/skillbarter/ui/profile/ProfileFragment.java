@@ -50,6 +50,7 @@ public class ProfileFragment extends Fragment {
 
         binding.btnEditOffered.setOnClickListener(v -> openAddSkills(0));
         binding.btnEditWanted.setOnClickListener(v -> openAddSkills(1));
+        binding.btnManageAvailability.setOnClickListener(v -> startActivity(new Intent(requireContext(), com.yashsoni.skillbarter.ui.availability.AvailabilityActivity.class)));
 
         binding.btnLogout.setOnClickListener(v -> {
             sessionManager.logout();
