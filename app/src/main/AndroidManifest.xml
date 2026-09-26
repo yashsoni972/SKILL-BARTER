@@ -77,6 +77,12 @@
         <activity
             android:name=".ui.availability.AvailabilityActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.credits.CreditsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.progress.ProgressActivity"
+            android:exported="false" />
 
     </application>
 

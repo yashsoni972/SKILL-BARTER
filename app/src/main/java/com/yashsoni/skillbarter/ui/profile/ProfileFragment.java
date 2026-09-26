@@ -12,16 +12,22 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
 import com.yashsoni.skillbarter.R;
+import com.yashsoni.skillbarter.data.model.Badge;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentProfileBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.auth.LoginActivity;
+import com.yashsoni.skillbarter.ui.badges.BadgeAdapter;
+import com.yashsoni.skillbarter.ui.credits.CreditsActivity;
+import com.yashsoni.skillbarter.ui.progress.ProgressActivity;
 import com.yashsoni.skillbarter.ui.skills.AddSkillsActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileFragment extends Fragment {
@@ -47,6 +53,9 @@ public class ProfileFragment extends Fragment {
         loadUserData();
 
         binding.ivAvatar.setOnClickListener(v -> showAvatarPickerDialog());
+
+        binding.btnCredits.setOnClickListener(v -> startActivity(new Intent(requireContext(), CreditsActivity.class)));
+        binding.btnProgress.setOnClickListener(v -> startActivity(new Intent(requireContext(), ProgressActivity.class)));
 
         binding.btnEditOffered.setOnClickListener(v -> openAddSkills(0));
         binding.btnEditWanted.setOnClickListener(v -> openAddSkills(1));
@@ -131,6 +140,17 @@ public class ProfileFragment extends Fragment {
             binding.tvSkillsStat.setText(String.valueOf(totalSkills));
             binding.tvRequestsStat.setText(String.valueOf(totalRequests));
             binding.tvCompletedStat.setText(String.valueOf(totalCompleted));
+
+            // Load Achievements & Badges
+            List<Badge> badgeList = new ArrayList<>();
+            badgeList.add(new Badge("b1", "First Exchange", "🥇", "Completed your first skill session"));
+            badgeList.add(new Badge("b2", "7 Day Streak", "🔥", "Active for 7 consecutive days"));
+            badgeList.add(new Badge("b3", "Top Mentor", "🧑‍🏫", "Taught 10+ hours"));
+            badgeList.add(new Badge("b4", "5-Star Rated", "⭐", "Perfect 5.0 mentor rating"));
+
+            BadgeAdapter badgeAdapter = new BadgeAdapter(badgeList);
+            binding.rvBadges.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.rvBadges.setAdapter(badgeAdapter);
 
             binding.chipGroupOffered.removeAllViews();
             List<String> offered = user.getOfferedSkills();
