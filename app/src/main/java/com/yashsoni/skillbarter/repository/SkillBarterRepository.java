@@ -3,10 +3,13 @@ package com.yashsoni.skillbarter.repository;
 import android.content.Context;
 import com.yashsoni.skillbarter.api.ApiClient;
 import com.yashsoni.skillbarter.api.ApiService;
+import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
+import com.yashsoni.skillbarter.data.model.HelpRequest;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
 import com.yashsoni.skillbarter.data.model.Skill;
+import com.yashsoni.skillbarter.data.model.SkillListing;
 import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.utils.SessionManager;
@@ -274,6 +277,73 @@ public class SkillBarterRepository {
 
     public void rejectRequest(String requestId) {
         mockIncomingRequests.removeIf(r -> r.getId().equals(requestId));
+    }
+
+    public void fetchMarketplaceListings(DataCallback<List<SkillListing>> callback) {
+        apiService.getMarketplaceListings().enqueue(new Callback<List<SkillListing>>() {
+            @Override
+            public void onResponse(Call<List<SkillListing>> call, Response<List<SkillListing>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onSuccess(getLocalListings());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SkillListing>> call, Throwable t) {
+                callback.onSuccess(getLocalListings());
+            }
+        });
+    }
+
+    private List<SkillListing> getLocalListings() {
+        List<SkillListing> list = new ArrayList<>();
+        User mentor1 = !mockUsers.isEmpty() ? mockUsers.get(0) : new User("m1", "Rahul Sharma", "rahul@example.com", "Anand", "Java Mentor", 4.8, 5);
+        User mentor2 = mockUsers.size() > 1 ? mockUsers.get(1) : new User("m2", "Aman Patel", "aman@example.com", "Vadodara", "Python Expert", 4.6, 3);
+
+        SkillListing sl1 = new SkillListing("Java", "Java Programming & OOP", "I can teach Java basics, Object-Oriented Programming, and Data Structures.", "Advanced", "Online", 10);
+        sl1.setUserId(mentor1);
+
+        SkillListing sl2 = new SkillListing("Python", "Python Data Science Essentials", "Hands-on guidance for Python programming, Pandas, and Data Analysis.", "Intermediate", "Online", 10);
+        sl2.setUserId(mentor2);
+
+        list.add(sl1);
+        list.add(sl2);
+        return list;
+    }
+
+    public void fetchHelpRequests(DataCallback<List<HelpRequest>> callback) {
+        apiService.getHelpRequests().enqueue(new Callback<List<HelpRequest>>() {
+            @Override
+            public void onResponse(Call<List<HelpRequest>> call, Response<List<HelpRequest>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onSuccess(getLocalHelpRequests());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<HelpRequest>> call, Throwable t) {
+                callback.onSuccess(getLocalHelpRequests());
+            }
+        });
+    }
+
+    private List<HelpRequest> getLocalHelpRequests() {
+        List<HelpRequest> list = new ArrayList<>();
+        User reqUser = sessionManager.getUser() != null ? sessionManager.getUser() : new User("u1", "Community Learner", "user@example.com", "Gujarat", "Learner", 5.0, 0);
+
+        HelpRequest hr1 = new HelpRequest("React", "Understanding React Hooks", "I need help understanding useEffect and custom hooks for my web project.", "Beginner", "Online");
+        hr1.setUserId(reqUser);
+
+        HelpRequest hr2 = new HelpRequest("Graphic Design", "UI Design Feedback & Layouts", "Looking for guidance on color contrast and Material 3 design principles.", "Intermediate", "Online");
+        hr2.setUserId(reqUser);
+
+        list.add(hr1);
+        list.add(hr2);
+        return list;
     }
 
     public List<Message> getMessagesForPartner(String partnerId) {
