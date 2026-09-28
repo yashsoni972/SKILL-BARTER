@@ -26,6 +26,14 @@ public class SplashActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
 
+        // Wake up Render cloud server in background immediately
+        com.yashsoni.skillbarter.api.ApiClient.getService(this).getStats().enqueue(new retrofit2.Callback<com.yashsoni.skillbarter.data.model.Stats>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.yashsoni.skillbarter.data.model.Stats> call, retrofit2.Response<com.yashsoni.skillbarter.data.model.Stats> response) {}
+            @Override
+            public void onFailure(retrofit2.Call<com.yashsoni.skillbarter.data.model.Stats> call, Throwable t) {}
+        });
+
         android.view.animation.Animation anim = android.view.animation.AnimationUtils.loadAnimation(this, com.yashsoni.skillbarter.R.anim.splash_scale);
         binding.ivLogo.startAnimation(anim);
 

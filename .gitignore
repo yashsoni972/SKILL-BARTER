@@ -17,3 +17,10 @@ node_modules/
 backend/node_modules/
 *.log
 
+# Secrets - never commit real credentials
+.env
+.env.local
+backend/.env
+# Keep the documented template
+!backend/.env.example
+

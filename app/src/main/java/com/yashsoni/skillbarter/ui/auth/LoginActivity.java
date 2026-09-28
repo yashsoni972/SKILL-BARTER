@@ -71,33 +71,21 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    completeLocalLogin(email);
+                    String errorMsg = "Login failed. Invalid credentials.";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    Toast.makeText(LoginActivity.this, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 binding.btnLogin.setEnabled(true);
-                completeLocalLogin(email);
+                Toast.makeText(LoginActivity.this, "Network error connecting to MongoDB Atlas: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void completeLocalLogin(String email) {
-        User user = sessionManager.getUser();
-        if (user == null) {
-            user = new User("user_local", "Barter Member", email, "Anand, Gujarat",
-                    "Passionate about web development, design and learning new technologies.", 5.0, 0);
-        } else {
-            user.setEmail(email);
-        }
-
-        sessionManager.createLoginSession("mock_jwt_token_123456", user);
-        Toast.makeText(this, "Welcome " + user.getName(), Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 }

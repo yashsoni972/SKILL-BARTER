@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// Override for local development: ./gradlew assembleDebug -PapiBaseUrl=http://10.0.2.2:5001/api/
+val apiBaseUrl: String = (project.findProperty("apiBaseUrl") as String?)
+    ?: "https://skillbarter-api-m0ev.onrender.com/api/"
+
 android {
     namespace = "com.yashsoni.skillbarter"
     compileSdk = 36
@@ -17,8 +21,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
+        }
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
         }
     }
     compileOptions {
@@ -27,6 +35,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -47,6 +56,10 @@ dependencies {
     implementation("androidx.navigation:navigation-ui:2.8.8")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+
+    // Room Database
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)

@@ -76,31 +76,21 @@ public class RegisterActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    // Fallback to local user session if server response is unexpected
-                    completeLocalRegistration(name, email, location);
+                    String errorMsg = "Registration failed";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    Toast.makeText(RegisterActivity.this, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 binding.btnRegister.setEnabled(true);
-                completeLocalRegistration(name, email, location);
+                Toast.makeText(RegisterActivity.this, "Network error connecting to MongoDB Atlas: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void completeLocalRegistration(String name, String email, String location) {
-        User newUser = new User("user_" + System.currentTimeMillis(), name, email,
-                location.isEmpty() ? "Anand, Gujarat" : location,
-                "Passionate about web development, design and learning new technologies.", 5.0, 0);
-
-        SkillBarterRepository.getInstance(this).registerUser(newUser);
-        sessionManager.createLoginSession("mock_jwt_token_register_123", newUser);
-        Toast.makeText(this, "Welcome " + name, Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 }

@@ -18,12 +18,16 @@ import com.yashsoni.skillbarter.databinding.FragmentRequestsBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.chat.ChatActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RequestsFragment extends Fragment {
 
     private FragmentRequestsBinding binding;
     private SkillBarterRepository repository;
+
+    private final List<ExchangeRequest> incomingRequests = new ArrayList<>();
+    private final List<ExchangeRequest> outgoingRequests = new ArrayList<>();
 
     @Nullable
     @Override
@@ -39,12 +43,12 @@ public class RequestsFragment extends Fragment {
         repository = SkillBarterRepository.getInstance(requireContext());
 
         updateTabTitles();
-        loadRequests(true);
+        submitList();
 
         binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                loadRequests(tab.getPosition() == 0);
+                submitList();
             }
 
             @Override
@@ -58,53 +62,117 @@ public class RequestsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateTabTitles();
-        if (binding != null && binding.tabLayout != null) {
-            loadRequests(binding.tabLayout.getSelectedTabPosition() == 0);
+        if (binding != null) {
+            refreshRequests();
         }
+    }
+
+    private boolean isIncomingSelected() {
+        return binding == null || binding.tabLayout.getSelectedTabPosition() == 0;
+    }
+
+    private void refreshRequests() {
+        if (binding == null) return;
+        binding.rvRequests.setAdapter(null);
+
+        repository.fetchIncomingRequests(new SkillBarterRepository.DataCallback<List<ExchangeRequest>>() {
+            @Override
+            public void onSuccess(List<ExchangeRequest> data) {
+                if (binding == null) return;
+                incomingRequests.clear();
+                incomingRequests.addAll(data);
+                updateTabTitles();
+                submitList();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
+
+        repository.fetchOutgoingRequests(new SkillBarterRepository.DataCallback<List<ExchangeRequest>>() {
+            @Override
+            public void onSuccess(List<ExchangeRequest> data) {
+                if (binding == null) return;
+                outgoingRequests.clear();
+                outgoingRequests.addAll(data);
+                updateTabTitles();
+                submitList();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
     }
 
     private void updateTabTitles() {
-        int incomingCount = repository.getIncomingRequests().size();
-        int outgoingCount = repository.getOutgoingRequests().size();
+        if (binding == null) return;
 
         if (binding.tabLayout.getTabAt(0) != null) {
-            binding.tabLayout.getTabAt(0).setText("Received (" + incomingCount + ")");
+            binding.tabLayout.getTabAt(0).setText("Received (" + incomingRequests.size() + ")");
         }
         if (binding.tabLayout.getTabAt(1) != null) {
-            binding.tabLayout.getTabAt(1).setText("Sent (" + outgoingCount + ")");
+            binding.tabLayout.getTabAt(1).setText("Sent (" + outgoingRequests.size() + ")");
         }
     }
 
-    private void loadRequests(boolean isIncoming) {
-        List<ExchangeRequest> list = isIncoming ? repository.getIncomingRequests() : repository.getOutgoingRequests();
+    private void submitList() {
+        if (binding == null) return;
+
+        List<ExchangeRequest> list = isIncomingSelected() ? incomingRequests : outgoingRequests;
 
         RequestAdapter adapter = new RequestAdapter(list, new RequestAdapter.OnRequestActionListener() {
             @Override
             public void onAccept(ExchangeRequest request) {
-                repository.acceptRequest(request.getId());
-                Toast.makeText(requireContext(), "Exchange Accepted! Opening Chat...", Toast.LENGTH_SHORT).show();
+                repository.acceptRequestApi(request.getId(), new SkillBarterRepository.DataCallback<ExchangeRequest>() {
+                    @Override
+                    public void onSuccess(ExchangeRequest data) {
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(), "Exchange Accepted! Opening Chat...", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(requireContext(), ChatActivity.class);
-                if (request.getSenderId() != null) {
-                    intent.putExtra("partnerUser", request.getSenderId());
-                }
-                startActivity(intent);
-                updateTabTitles();
-                loadRequests(true);
+                        Intent intent = new Intent(requireContext(), ChatActivity.class);
+                        if (request.getSenderId() != null) {
+                            intent.putExtra("partnerUser", request.getSenderId());
+                        }
+                        startActivity(intent);
+                        refreshRequests();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showError(message);
+                    }
+                });
             }
 
             @Override
             public void onReject(ExchangeRequest request) {
-                repository.rejectRequest(request.getId());
-                Toast.makeText(requireContext(), "Exchange Request Rejected", Toast.LENGTH_SHORT).show();
-                updateTabTitles();
-                loadRequests(true);
+                repository.rejectRequestApi(request.getId(), new SkillBarterRepository.DataCallback<ExchangeRequest>() {
+                    @Override
+                    public void onSuccess(ExchangeRequest data) {
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(), "Exchange Request Rejected", Toast.LENGTH_SHORT).show();
+                        refreshRequests();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showError(message);
+                    }
+                });
             }
         });
 
         binding.rvRequests.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvRequests.setAdapter(adapter);
+    }
+
+    private void showError(String message) {
+        if (!isAdded()) return;
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override

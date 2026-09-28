@@ -1,6 +1,7 @@
 package com.yashsoni.skillbarter.api;
 
 import android.content.Context;
+import com.yashsoni.skillbarter.BuildConfig;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
 import okhttp3.Interceptor;
@@ -11,13 +12,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String BASE_URL = "https://skillbarter-api-m0ev.onrender.com/api/";
+    private static final String BASE_URL = BuildConfig.BASE_URL;
     private static ApiService apiService;
 
     public static ApiService getService(Context context) {
         if (apiService == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            logging.setLevel(BuildConfig.DEBUG
+                    ? HttpLoggingInterceptor.Level.BODY
+                    : HttpLoggingInterceptor.Level.NONE);
 
             SessionManager sessionManager = new SessionManager(context.getApplicationContext());
 
@@ -33,7 +36,14 @@ public class ApiClient {
                 return chain.proceed(builder.build());
             };
 
+            // Render free-tier instances spin down when idle, so a cold start can
+            // take 30-90s. Keep the timeouts above that ceiling or the first
+            // request of a session fails with SocketTimeoutException.
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .writeTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
                     .addInterceptor(logging)
                     .addInterceptor(authInterceptor)
                     .build();

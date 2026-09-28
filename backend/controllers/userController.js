@@ -65,7 +65,7 @@ exports.searchUsers = async (req, res) => {
       const offered = await Skill.find({ userId: u._id, type: 'offer' });
       const wanted = await Skill.find({ userId: u._id, type: 'want' });
       return {
-        id: u._id,
+        _id: u._id,
         name: u.name,
         email: u.email,
         location: u.location,
@@ -98,7 +98,7 @@ exports.getRecommendedPartners = async (req, res) => {
       const offered = await Skill.find({ userId: u._id, type: 'offer' });
       const wanted = await Skill.find({ userId: u._id, type: 'want' });
       return {
-        id: u._id,
+        _id: u._id,
         name: u.name,
         email: u.email,
         location: u.location,

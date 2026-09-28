@@ -5,6 +5,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivitySendRequestBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
@@ -26,8 +27,8 @@ public class SendRequestActivity extends AppCompatActivity {
 
         targetUser = (User) getIntent().getSerializableExtra("targetUser");
         if (targetUser == null) {
-            targetUser = new User("u1", "Riya Sharma", "riya@example.com", "Ahmedabad", "UI/UX Designer", 4.8, 5);
-            targetUser.getOfferedSkills().add("Graphic Design");
+            finish();
+            return;
         }
 
         binding.tvUserName.setText(targetUser.getName());
@@ -47,9 +48,25 @@ public class SendRequestActivity extends AppCompatActivity {
 
         binding.btnSendRequest.setOnClickListener(v -> {
             String msg = binding.etMessage.getText().toString().trim();
-            repository.addOutgoingRequest(targetUser, teach, want, msg);
-            Toast.makeText(this, "✓ Exchange Request Sent Successfully!", Toast.LENGTH_SHORT).show();
-            finish();
+            if (targetUser.getId() == null || targetUser.getId().isEmpty()) {
+                Toast.makeText(this, "Cannot send request: partner account is not synced to the cloud database.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            binding.btnSendRequest.setEnabled(false);
+            repository.sendExchangeRequest(targetUser.getId(), teach, want, msg, new SkillBarterRepository.DataCallback<ExchangeRequest>() {
+                @Override
+                public void onSuccess(ExchangeRequest data) {
+                    Toast.makeText(SendRequestActivity.this, "Exchange Request Sent Successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+                @Override
+                public void onError(String message) {
+                    binding.btnSendRequest.setEnabled(true);
+                    Toast.makeText(SendRequestActivity.this, message, Toast.LENGTH_LONG).show();
+                }
+            });
         });
     }
 }

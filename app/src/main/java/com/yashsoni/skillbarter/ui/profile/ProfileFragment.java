@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.chip.Chip;
 import com.yashsoni.skillbarter.R;
 import com.yashsoni.skillbarter.data.model.Badge;
+import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentProfileBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
@@ -35,6 +36,8 @@ public class ProfileFragment extends Fragment {
     private FragmentProfileBinding binding;
     private SessionManager sessionManager;
     private SkillBarterRepository repository;
+    private int incomingRequestCount;
+    private int outgoingRequestCount;
 
     @Nullable
     @Override
@@ -73,6 +76,7 @@ public class ProfileFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadUserData();
+        loadRequestCount();
     }
 
     private void showAvatarPickerDialog() {
@@ -134,11 +138,11 @@ public class ProfileFragment extends Fragment {
             int wantedCount = (user.getWantedSkills() != null) ? user.getWantedSkills().size() : 0;
             int totalSkills = offeredCount + wantedCount;
 
-            int totalRequests = repository.getIncomingRequests().size() + repository.getOutgoingRequests().size();
+            int requestCount = incomingRequestCount + outgoingRequestCount;
             int totalCompleted = user.getTotalExchanges();
 
             binding.tvSkillsStat.setText(String.valueOf(totalSkills));
-            binding.tvRequestsStat.setText(String.valueOf(totalRequests));
+            binding.tvRequestsStat.setText(String.valueOf(requestCount));
             binding.tvCompletedStat.setText(String.valueOf(totalCompleted));
 
             // Load Achievements & Badges
@@ -172,6 +176,35 @@ public class ProfileFragment extends Fragment {
                 }
             }
         }
+    }
+
+    private void loadRequestCount() {
+        repository.fetchIncomingRequests(new SkillBarterRepository.DataCallback<List<ExchangeRequest>>() {
+            @Override
+            public void onSuccess(List<ExchangeRequest> data) {
+                incomingRequestCount = data.size();
+                applyRequestCount();
+            }
+
+            @Override
+            public void onError(String message) {}
+        });
+
+        repository.fetchOutgoingRequests(new SkillBarterRepository.DataCallback<List<ExchangeRequest>>() {
+            @Override
+            public void onSuccess(List<ExchangeRequest> data) {
+                outgoingRequestCount = data.size();
+                applyRequestCount();
+            }
+
+            @Override
+            public void onError(String message) {}
+        });
+    }
+
+    private void applyRequestCount() {
+        if (binding == null) return;
+        binding.tvRequestsStat.setText(String.valueOf(incomingRequestCount + outgoingRequestCount));
     }
 
     public static int getAvatarResource(String key) {

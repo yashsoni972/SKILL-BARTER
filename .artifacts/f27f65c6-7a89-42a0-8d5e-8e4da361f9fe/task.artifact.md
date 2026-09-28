@@ -1,8 +1,7 @@
-# Task Progress - Offline Caching with Room
+# Task Progress - Connect Exchange Requests to MongoDB Atlas
 
-- [ ] Add Room dependencies to `app/build.gradle.kts` `[/]`
-- [ ] Create Room entities (`UserEntity.java`, `MessageEntity.java`) `[ ]`
-- [ ] Create DAO (`SkillBarterDao.java`) and Database (`SkillBarterDatabase.java`) `[ ]`
-- [ ] Update `SkillBarterRepository.java` for Room offline caching fallback `[ ]`
-- [ ] Run build and test verification (`assembleDebug`, `testDebugUnitTest`, `lintDebug`) `[ ]`
-- [ ] Create walkthrough artifact `[ ]`
+- [x] Update `SkillBarterRepository.java` with async API methods for exchange requests
+- [x] Update `SendRequestActivity.java` to send requests to backend
+- [x] Update `RequestsFragment.java` to load requests via API callbacks and handle actions
+- [x] Run build and test verification (`assembleDebug`, `testDebugUnitTest`, `lintDebug`)
+- [x] Create walkthrough artifact

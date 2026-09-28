@@ -1,41 +1,34 @@
-# Offline Caching with Room Implementation Plan
+# Connect Exchange Requests to MongoDB Atlas Backend Plan
 
-Implement local database caching using **Android Room Persistence Library** to enable offline support and seamless fallback for users, profiles, and messages in Skill Barter.
+Refactor `SkillBarterRepository` and `RequestsFragment` to fetch, send, accept, and reject exchange requests via the live backend API and MongoDB Atlas (`exchangerequests` collection) instead of in-memory mock lists.
 
 ## User Review Required
 
-> [!NOTE]
-> This addition introduces Room database dependencies and local DAOs/entities to cache user profiles, skills, and messages locally, allowing the app to function smoothly even when offline or when the backend server is unreachable.
+> [!IMPORTANT]
+> This change connects the **Exchange Requests** feature (Sending, Receiving, Accepting, Rejecting) directly to MongoDB Atlas via Retrofit API calls, ensuring requests persist correctly and sync across multiple devices (such as between your phone and your mother's phone).
 
 ## Open Questions
 
-- None. Room 2.6.1 / 2.7.x libraries will be added to `app/build.gradle.kts`.
+- None. The backend REST endpoints (`POST /api/requests`, `GET /api/requests/incoming`, `GET /api/requests/outgoing`, `PUT /api/requests/:id/accept`, `PUT /api/requests/:id/reject`) are already fully implemented in the Node.js server.
 
 ## Proposed Changes
 
-### Dependencies & Setup
-
-#### [MODIFY] [build.gradle.kts](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/build.gradle.kts)
-- Add Room dependencies (`androidx.room:room-runtime`, `androidx.room:room-compiler`) and annotation processor.
-
-### Database Entities & DAOs
-
-#### [NEW] [UserEntity.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/data/local/UserEntity.java)
-- Room entity for cached users.
-
-#### [NEW] [MessageEntity.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/data/local/MessageEntity.java)
-- Room entity for cached chat messages.
-
-#### [NEW] [SkillBarterDao.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/data/local/SkillBarterDao.java)
-- Data Access Object for users and messages.
-
-#### [NEW] [SkillBarterDatabase.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/data/local/SkillBarterDatabase.java)
-- Room Database abstract class singleton.
-
-### Repository Integration
+### Repository Refactoring
 
 #### [MODIFY] [SkillBarterRepository.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/repository/SkillBarterRepository.java)
-- Integrate Room database access as offline fallback alongside Retrofit API calls.
+- Update `fetchIncomingRequests(DataCallback<List<ExchangeRequest>> callback)` to call `apiService.getIncomingRequests()`.
+- Update `fetchOutgoingRequests(DataCallback<List<ExchangeRequest>> callback)` to call `apiService.getOutgoingRequests()`.
+- Update `sendExchangeRequest(...)` to call `apiService.sendRequest(...)`.
+- Update `acceptRequest(...)` to call `apiService.acceptRequest(...)`.
+- Update `rejectRequest(...)` to call `apiService.rejectRequest(...)`.
+
+### UI Integration
+
+#### [MODIFY] [RequestsFragment.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/requests/RequestsFragment.java)
+- Update `loadRequests()` and `updateTabTitles()` to use asynchronous API callbacks (`DataCallback`) when fetching incoming and outgoing requests from MongoDB Atlas.
+
+#### [MODIFY] [SendRequestActivity.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/requests/SendRequestActivity.java)
+- Ensure sending a request uses `apiService.sendRequest(...)` and saves to MongoDB Atlas.
 
 ## Verification Plan
 
@@ -45,4 +38,4 @@ Implement local database caching using **Android Room Persistence Library** to e
 - Run `./gradlew app:lintDebug`
 
 ### Manual Verification
-- Deploy app to emulator/device, verify offline loading of cached profiles and messages.
+- Send an exchange request from the app, check MongoDB Atlas `exchangerequests` collection to verify the document is saved in the cloud database, and view it in the Requests tab.

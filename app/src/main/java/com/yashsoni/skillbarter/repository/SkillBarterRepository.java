@@ -8,16 +8,16 @@ import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.HelpRequest;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
-import com.yashsoni.skillbarter.data.model.Skill;
 import com.yashsoni.skillbarter.data.model.SkillListing;
 import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.utils.SessionManager;
-import com.yashsoni.skillbarter.utils.SkillMatchEngine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,11 +26,10 @@ import retrofit2.Response;
 public class SkillBarterRepository {
     private final ApiService apiService;
     private final SessionManager sessionManager;
+    private final com.yashsoni.skillbarter.data.local.SkillBarterDao skillBarterDao;
 
     private static SkillBarterRepository instance;
     private final List<User> mockUsers = new ArrayList<>();
-    private final List<ExchangeRequest> mockIncomingRequests = new ArrayList<>();
-    private final List<ExchangeRequest> mockOutgoingRequests = new ArrayList<>();
     private final List<Message> mockMessages = new ArrayList<>();
 
     public interface DataCallback<T> {
@@ -41,6 +40,7 @@ public class SkillBarterRepository {
     private SkillBarterRepository(Context context) {
         this.apiService = ApiClient.getService(context);
         this.sessionManager = new SessionManager(context);
+        this.skillBarterDao = com.yashsoni.skillbarter.data.local.SkillBarterDatabase.getInstance(context).skillBarterDao();
         initCommunityMembers();
     }
 
@@ -130,8 +130,7 @@ public class SkillBarterRepository {
 
     public Stats getStats() {
         int total = Math.max(128, mockUsers.size() + 120);
-        int active = mockOutgoingRequests.size() + mockIncomingRequests.size() + 46;
-        return new Stats(total, active, 31);
+        return new Stats(total, 46, 31);
     }
 
     public void fetchRecommendedUsers(DataCallback<List<User>> callback) {
@@ -156,55 +155,19 @@ public class SkillBarterRepository {
         apiService.getDiscoverUsers(skill, category, location).enqueue(new Callback<List<MatchResult>>() {
             @Override
             public void onResponse(Call<List<MatchResult>> call, Response<List<MatchResult>> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onSuccess(getMatchResults(skill));
+                    callback.onError("Server error (HTTP " + response.code() + "). Is the backend running?");
                 }
             }
 
             @Override
             public void onFailure(Call<List<MatchResult>> call, Throwable t) {
-                callback.onSuccess(getMatchResults(skill));
+                String detail = t.getMessage();
+                callback.onError("Cannot reach backend: " + (detail != null ? detail : "unknown network error"));
             }
         });
-    }
-
-    public List<MatchResult> getMatchResults(String query) {
-        User currentUser = sessionManager.getUser();
-        List<User> searchList = searchUsers(query);
-        List<MatchResult> results = new ArrayList<>();
-
-        for (User u : searchList) {
-            MatchResult res = new MatchResult();
-            res.setId(u.getId());
-            res.setName(u.getName());
-            res.setEmail(u.getEmail());
-            res.setLocation(u.getLocation());
-            res.setBio(u.getBio());
-            res.setRating(u.getRating());
-            res.setProfileImage(u.getProfileImage());
-
-            List<Skill> offerSkills = new ArrayList<>();
-            if (u.getOfferedSkills() != null) {
-                for (String s : u.getOfferedSkills()) { offerSkills.add(new Skill(s, "General", "offer", "Intermediate")); }
-            }
-            res.setOffers(offerSkills);
-
-            List<Skill> wantSkills = new ArrayList<>();
-            if (u.getWantedSkills() != null) {
-                for (String s : u.getWantedSkills()) { wantSkills.add(new Skill(s, "General", "want", "Beginner")); }
-            }
-            res.setWants(wantSkills);
-
-            int matchPct = SkillMatchEngine.calculateMatchPercentage(currentUser, u);
-            res.setMatchPercentage(matchPct);
-
-            results.add(res);
-        }
-
-        results.sort((a, b) -> Integer.compare(b.getMatchPercentage(), a.getMatchPercentage()));
-        return results;
     }
 
     public List<User> getRecommendedUsers() {
@@ -219,64 +182,112 @@ public class SkillBarterRepository {
         return list;
     }
 
-    public List<User> searchUsers(String query) {
-        List<User> base = getRecommendedUsers();
-        if (query == null || query.trim().isEmpty()) {
-            return base;
-        }
-        String q = query.toLowerCase().trim();
-        List<User> results = new ArrayList<>();
-        for (User u : base) {
-            boolean matchesSkill = false;
-            if (u.getOfferedSkills() != null) {
-                for (String s : u.getOfferedSkills()) {
-                    if (s.toLowerCase().contains(q)) { matchesSkill = true; break; }
+    public void fetchIncomingRequests(DataCallback<List<ExchangeRequest>> callback) {
+        apiService.getIncomingRequests().enqueue(new Callback<List<ExchangeRequest>>() {
+            @Override
+            public void onResponse(Call<List<ExchangeRequest>> call, Response<List<ExchangeRequest>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(httpError(response.code()));
                 }
             }
-            if (u.getWantedSkills() != null) {
-                for (String s : u.getWantedSkills()) {
-                    if (s.toLowerCase().contains(q)) { matchesSkill = true; break; }
+
+            @Override
+            public void onFailure(Call<List<ExchangeRequest>> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    public void fetchOutgoingRequests(DataCallback<List<ExchangeRequest>> callback) {
+        apiService.getOutgoingRequests().enqueue(new Callback<List<ExchangeRequest>>() {
+            @Override
+            public void onResponse(Call<List<ExchangeRequest>> call, Response<List<ExchangeRequest>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(httpError(response.code()));
                 }
             }
-            if (u.getName().toLowerCase().contains(q) || (u.getLocation() != null && u.getLocation().toLowerCase().contains(q)) || matchesSkill) {
-                results.add(u);
+
+            @Override
+            public void onFailure(Call<List<ExchangeRequest>> call, Throwable t) {
+                callback.onError(networkError(t));
             }
-        }
-        return results;
+        });
     }
 
-    public List<ExchangeRequest> getIncomingRequests() {
-        return new ArrayList<>(mockIncomingRequests);
-    }
+    public void sendExchangeRequest(String receiverId, String offeredSkill, String requestedSkill, String message, DataCallback<ExchangeRequest> callback) {
+        Map<String, String> body = new HashMap<>();
+        body.put("receiverId", receiverId);
+        body.put("offeredSkill", offeredSkill);
+        body.put("requestedSkill", requestedSkill);
+        body.put("message", message);
 
-    public List<ExchangeRequest> getOutgoingRequests() {
-        return new ArrayList<>(mockOutgoingRequests);
-    }
-
-    public void addOutgoingRequest(User partner, String offeredSkill, String requestedSkill, String msg) {
-        ExchangeRequest req = new ExchangeRequest();
-        req.setId("req_" + System.currentTimeMillis());
-        req.setSenderId(sessionManager.getUser());
-        req.setReceiverId(partner);
-        req.setOfferedSkill(offeredSkill);
-        req.setRequestedSkill(requestedSkill);
-        req.setMessage(msg);
-        req.setStatus("pending");
-        req.setCreatedAt("Just now");
-        mockOutgoingRequests.add(req);
-    }
-
-    public void acceptRequest(String requestId) {
-        for (ExchangeRequest r : mockIncomingRequests) {
-            if (r.getId().equals(requestId)) {
-                r.setStatus("accepted");
-                break;
+        apiService.sendRequest(body).enqueue(new Callback<ExchangeRequest>() {
+            @Override
+            public void onResponse(Call<ExchangeRequest> call, Response<ExchangeRequest> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(httpError(response.code()));
+                }
             }
-        }
+
+            @Override
+            public void onFailure(Call<ExchangeRequest> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
     }
 
-    public void rejectRequest(String requestId) {
-        mockIncomingRequests.removeIf(r -> r.getId().equals(requestId));
+    public void acceptRequestApi(String requestId, DataCallback<ExchangeRequest> callback) {
+        apiService.acceptRequest(requestId).enqueue(new Callback<ExchangeRequest>() {
+            @Override
+            public void onResponse(Call<ExchangeRequest> call, Response<ExchangeRequest> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(httpError(response.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ExchangeRequest> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    public void rejectRequestApi(String requestId, DataCallback<ExchangeRequest> callback) {
+        apiService.rejectRequest(requestId).enqueue(new Callback<ExchangeRequest>() {
+            @Override
+            public void onResponse(Call<ExchangeRequest> call, Response<ExchangeRequest> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(httpError(response.code()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ExchangeRequest> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    private String httpError(int code) {
+        if (code == 401) {
+            return "Session expired. Please log in again.";
+        }
+        return "Server error (HTTP " + code + "). Please try again.";
+    }
+
+    private String networkError(Throwable t) {
+        String detail = t.getMessage();
+        return "Cannot reach backend: " + (detail != null ? detail : "unknown network error");
     }
 
     public void fetchMarketplaceListings(DataCallback<List<SkillListing>> callback) {

@@ -1,12 +1,24 @@
 package com.yashsoni.skillbarter.data.model;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 
 public class ExchangeRequest implements Serializable {
     @SerializedName("_id")
     private String id;
+
+    @JsonAdapter(UserRef.class)
     private User senderId;
+
+    @JsonAdapter(UserRef.class)
     private User receiverId;
     private String offeredSkill;
     private String requestedSkill;
@@ -39,4 +51,24 @@ public class ExchangeRequest implements Serializable {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public static class UserRef implements JsonDeserializer<User>, JsonSerializer<User> {
+        @Override
+        public User deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            if (json == null || json.isJsonNull()) {
+                return null;
+            }
+            if (json.isJsonPrimitive()) {
+                User user = new User();
+                user.setId(json.getAsString());
+                return user;
+            }
+            return context.deserialize(json, User.class);
+        }
+
+        @Override
+        public JsonElement serialize(User user, Type typeOfSrc, JsonSerializationContext context) {
+            return context.serialize(user, User.class);
+        }
+    }
 }

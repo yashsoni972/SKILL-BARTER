@@ -106,9 +106,9 @@ public class DiscoverFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                if (binding != null) {
-                    binding.tvResultsCount.setText("Showing matching skill partners");
-                }
+                if (binding == null) return;
+                binding.tvResultsCount.setText("⚠️ " + message);
+                binding.rvSearchResults.setAdapter(null);
             }
         });
     }
