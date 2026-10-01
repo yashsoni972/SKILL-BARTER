@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const creditService = require('./creditController');
 
 exports.register = async (req, res) => {
   try {
@@ -23,6 +24,14 @@ exports.register = async (req, res) => {
 
     await user.save();
 
+    // Every new member starts with credits so they can learn before they have
+    // taught anything.
+    try {
+      await creditService.grantWelcomeCredits(user._id);
+    } catch (err) {
+      console.error('welcome credits failed:', err.message);
+    }
+
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET || 'skill_barter_super_secret_jwt_key_2026_xyz',
@@ -33,6 +42,7 @@ exports.register = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
         location: user.location,
@@ -69,6 +79,7 @@ exports.login = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
         location: user.location,

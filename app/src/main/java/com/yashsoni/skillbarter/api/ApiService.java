@@ -4,7 +4,9 @@ import com.yashsoni.skillbarter.data.model.AuthResponse;
 import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
 import com.yashsoni.skillbarter.data.model.Credit;
+import com.yashsoni.skillbarter.data.model.Conversation;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
+import com.yashsoni.skillbarter.data.model.ExchangeSummary;
 import com.yashsoni.skillbarter.data.model.HelpRequest;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
@@ -84,8 +86,23 @@ public interface ApiService {
     @GET("messages/{userId}")
     Call<List<Message>> getMessages(@Path("userId") String userId);
 
+    @GET("messages/conversations")
+    Call<List<Conversation>> getConversations();
+
+    @GET("users/progress")
+    Call<com.yashsoni.skillbarter.data.model.Progress> getProgress();
+
+    @GET("availability/me")
+    Call<List<Availability>> getMyAvailability();
+
+    @DELETE("availability/{id}")
+    Call<com.google.gson.JsonObject> deleteAvailability(@Path("id") String id);
+
     @POST("sessions")
     Call<Session> createSession(@Body Map<String, String> body);
+
+    @POST("sessions/complete")
+    Call<com.google.gson.JsonObject> completeSession(@Body Map<String, Object> body);
 
     @GET("sessions")
     Call<List<Session>> getSessions();
@@ -93,8 +110,23 @@ public interface ApiService {
     @POST("reviews")
     Call<Review> addReview(@Body Map<String, Object> body);
 
+    @GET("reviews/mine")
+    Call<List<Review>> getMyReviews();
+
     @GET("notifications")
     Call<List<Notification>> getNotifications();
+
+    @GET("notifications/unread-count")
+    Call<com.google.gson.JsonObject> getUnreadNotificationCount();
+
+    @PUT("notifications/read-all")
+    Call<com.google.gson.JsonObject> markNotificationsRead();
+
+    @GET("requests/exchanges")
+    Call<List<ExchangeSummary>> getMyExchanges();
+
+    @GET("requests/with/{userId}")
+    Call<com.google.gson.JsonObject> getRelationshipWith(@Path("userId") String userId);
 
     @GET("marketplace")
     Call<List<SkillListing>> getMarketplaceListings();

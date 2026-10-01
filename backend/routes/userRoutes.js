@@ -8,5 +8,6 @@ router.put('/profile', authMiddleware, userController.updateProfile);
 router.get('/stats', userController.getStats);
 router.get('/search', authMiddleware, userController.searchUsers);
 router.get('/recommended', authMiddleware, userController.getRecommendedPartners);
+router.get('/progress', authMiddleware, userController.getProgress);
 
 module.exports = router;

@@ -16,14 +16,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
 import com.yashsoni.skillbarter.R;
+import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
+import com.yashsoni.skillbarter.data.model.Credit;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentProfileBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.auth.LoginActivity;
+import com.yashsoni.skillbarter.ui.availability.AvailabilityActivity;
 import com.yashsoni.skillbarter.ui.badges.BadgeAdapter;
 import com.yashsoni.skillbarter.ui.credits.CreditsActivity;
+import com.yashsoni.skillbarter.ui.exchanges.ExchangesActivity;
 import com.yashsoni.skillbarter.ui.progress.ProgressActivity;
 import com.yashsoni.skillbarter.ui.skills.AddSkillsActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
@@ -59,10 +63,11 @@ public class ProfileFragment extends Fragment {
 
         binding.btnCredits.setOnClickListener(v -> startActivity(new Intent(requireContext(), CreditsActivity.class)));
         binding.btnProgress.setOnClickListener(v -> startActivity(new Intent(requireContext(), ProgressActivity.class)));
+        binding.btnMyExchanges.setOnClickListener(v -> startActivity(new Intent(requireContext(), ExchangesActivity.class)));
 
         binding.btnEditOffered.setOnClickListener(v -> openAddSkills(0));
         binding.btnEditWanted.setOnClickListener(v -> openAddSkills(1));
-        binding.btnManageAvailability.setOnClickListener(v -> startActivity(new Intent(requireContext(), com.yashsoni.skillbarter.ui.availability.AvailabilityActivity.class)));
+        binding.btnManageAvailability.setOnClickListener(v -> startActivity(new Intent(requireContext(), AvailabilityActivity.class)));
 
         binding.btnLogout.setOnClickListener(v -> {
             sessionManager.logout();
@@ -76,7 +81,26 @@ public class ProfileFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadUserData();
+        loadBadges();
         loadRequestCount();
+        loadAvailabilitySummary();
+        loadCreditBalance();
+    }
+
+    /** Shows the real balance on the Credits button instead of a fixed label. */
+    private void loadCreditBalance() {
+        repository.fetchCredits(new SkillBarterRepository.DataCallback<Credit>() {
+            @Override
+            public void onSuccess(Credit credit) {
+                if (binding == null) return;
+                binding.btnCredits.setText(getString(R.string.credits_balance_format, credit.getBalance()));
+            }
+
+            @Override
+            public void onError(String message) {
+                // Keep the plain "Credits" label rather than showing an error.
+            }
+        });
     }
 
     private void showAvatarPickerDialog() {
@@ -107,6 +131,7 @@ public class ProfileFragment extends Fragment {
                 user.setProfileImage(selectedAvatarKey);
                 sessionManager.updateUser(user);
                 loadUserData();
+                loadBadges();
                 Toast.makeText(requireContext(), "Profile avatar updated!", Toast.LENGTH_SHORT).show();
             }
             dialog.dismiss();
@@ -145,16 +170,7 @@ public class ProfileFragment extends Fragment {
             binding.tvRequestsStat.setText(String.valueOf(requestCount));
             binding.tvCompletedStat.setText(String.valueOf(totalCompleted));
 
-            // Load Achievements & Badges
-            List<Badge> badgeList = new ArrayList<>();
-            badgeList.add(new Badge("b1", "First Exchange", "🥇", "Completed your first skill session"));
-            badgeList.add(new Badge("b2", "7 Day Streak", "🔥", "Active for 7 consecutive days"));
-            badgeList.add(new Badge("b3", "Top Mentor", "🧑‍🏫", "Taught 10+ hours"));
-            badgeList.add(new Badge("b4", "5-Star Rated", "⭐", "Perfect 5.0 mentor rating"));
-
-            BadgeAdapter badgeAdapter = new BadgeAdapter(badgeList);
-            binding.rvBadges.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-            binding.rvBadges.setAdapter(badgeAdapter);
+            // Badges are loaded asynchronously from the backend
 
             binding.chipGroupOffered.removeAllViews();
             List<String> offered = user.getOfferedSkills();
@@ -199,6 +215,53 @@ public class ProfileFragment extends Fragment {
 
             @Override
             public void onError(String message) {}
+        });
+    }
+
+    private void loadBadges() {
+        repository.fetchBadges(new SkillBarterRepository.DataCallback<List<Badge>>() {
+            @Override
+            public void onSuccess(List<Badge> badges) {
+                if (binding == null) return;
+                if (badges.isEmpty()) {
+                    binding.rvBadges.setVisibility(View.GONE);
+                    return;
+                }
+                binding.rvBadges.setVisibility(View.VISIBLE);
+                binding.rvBadges.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                binding.rvBadges.setAdapter(new BadgeAdapter(badges));
+            }
+
+            @Override
+            public void onError(String message) {
+                if (binding == null) return;
+                binding.rvBadges.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    /** Shows the real saved slots instead of a static placeholder string. */
+    private void loadAvailabilitySummary() {
+        repository.fetchMyAvailability(new SkillBarterRepository.DataCallback<List<Availability>>() {
+            @Override
+            public void onSuccess(List<Availability> slots) {
+                if (binding == null) return;
+                if (slots == null || slots.isEmpty()) {
+                    binding.tvAvailabilitySummary.setText("No availability slots added yet");
+                    return;
+                }
+                List<String> parts = new ArrayList<>();
+                for (Availability slot : slots) {
+                    parts.add(slot.getDay().substring(0, 3) + " " + slot.getStartTime() + "-" + slot.getEndTime());
+                }
+                binding.tvAvailabilitySummary.setText("• " + String.join("\n• ", parts));
+            }
+
+            @Override
+            public void onError(String message) {
+                if (binding == null) return;
+                binding.tvAvailabilitySummary.setText("Could not load availability");
+            }
         });
     }
 

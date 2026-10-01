@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class User implements Serializable {
-    @SerializedName("_id")
+    // The API is inconsistent: some endpoints (users/recommended, older auth
+    // responses) send "id" while others send Mongo's "_id". Accept either so the
+    // id is never null, otherwise every @Path("userId") call throws.
+    @SerializedName(value = "id", alternate = { "_id" })
     private String id;
     private String name;
     private String email;

@@ -14,9 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
+import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.FragmentRequestsBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.chat.ChatActivity;
+import com.yashsoni.skillbarter.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ public class RequestsFragment extends Fragment {
 
     private FragmentRequestsBinding binding;
     private SkillBarterRepository repository;
+    private SessionManager sessionManager;
 
     private final List<ExchangeRequest> incomingRequests = new ArrayList<>();
     private final List<ExchangeRequest> outgoingRequests = new ArrayList<>();
@@ -41,6 +44,7 @@ public class RequestsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         repository = SkillBarterRepository.getInstance(requireContext());
+        sessionManager = new SessionManager(requireContext());
 
         updateTabTitles();
         submitList();
@@ -124,19 +128,38 @@ public class RequestsFragment extends Fragment {
 
         List<ExchangeRequest> list = isIncomingSelected() ? incomingRequests : outgoingRequests;
 
-        RequestAdapter adapter = new RequestAdapter(list, new RequestAdapter.OnRequestActionListener() {
+        User currentUser = sessionManager.getUser();
+        String currentUserId = currentUser != null ? currentUser.getId() : null;
+        final boolean incomingTab = isIncomingSelected();
+
+        RequestAdapter adapter = new RequestAdapter(list, incomingTab, currentUserId, new RequestAdapter.OnRequestActionListener() {
             @Override
             public void onAccept(ExchangeRequest request) {
                 repository.acceptRequestApi(request.getId(), new SkillBarterRepository.DataCallback<ExchangeRequest>() {
                     @Override
                     public void onSuccess(ExchangeRequest data) {
                         if (!isAdded()) return;
+
+                        // Accept applies to incoming requests only; open the chat
+                        // with the other person, not with the sender.
+                        User other = request.getOtherUser(
+                                sessionManager.getUser() != null ? sessionManager.getUser().getId() : null);
+                        if (other == null || other.getId() == null) {
+                            Toast.makeText(requireContext(), "Accepted, but this user has no id to chat with.", Toast.LENGTH_LONG).show();
+                            refreshRequests();
+                            return;
+                        }
+
                         Toast.makeText(requireContext(), "Exchange Accepted! Opening Chat...", Toast.LENGTH_SHORT).show();
 
                         Intent intent = new Intent(requireContext(), ChatActivity.class);
-                        if (request.getSenderId() != null) {
-                            intent.putExtra("partnerUser", request.getSenderId());
-                        }
+                        intent.putExtra("partnerUser", other);
+                        // Carried through so a completed session can be tied to this
+                        // exchange; without it the backend has no request to mark completed.
+                        intent.putExtra("requestId", request.getId());
+                        intent.putExtra("requestedSkill", request.getRequestedSkill());
+                        intent.putExtra("offeredSkill", request.getOfferedSkill());
+                        intent.putExtra("direction", request.getDirection());
                         startActivity(intent);
                         refreshRequests();
                     }
@@ -163,6 +186,21 @@ public class RequestsFragment extends Fragment {
                         showError(message);
                     }
                 });
+            }
+
+            @Override
+            public void onChat(ExchangeRequest request, User partner) {
+                if (partner == null || partner.getId() == null) {
+                    showError("Cannot open chat: this user has no account id.");
+                    return;
+                }
+                Intent intent = new Intent(requireContext(), ChatActivity.class);
+                intent.putExtra("partnerUser", partner);
+                intent.putExtra("requestId", request.getId());
+                intent.putExtra("requestedSkill", request.getRequestedSkill());
+                intent.putExtra("offeredSkill", request.getOfferedSkill());
+                intent.putExtra("direction", request.getDirection());
+                startActivity(intent);
             }
         });
 

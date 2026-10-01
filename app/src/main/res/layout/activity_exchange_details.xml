@@ -101,7 +101,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Riya Sharma"
+                    android:text=""
                     android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
@@ -131,7 +131,6 @@
             android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📅 Date: Sat, 27 Sep 2026"
             android:textColor="@color/text_primary"
             android:textSize="15sp" />
 
@@ -140,7 +139,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="🕒 Time: 4:00 PM - 5:00 PM"
             android:textColor="@color/text_primary"
             android:textSize="15sp" />
 
@@ -149,7 +147,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="📍 Location: Online (Google Meet)"
             android:textColor="@color/text_primary"
             android:textSize="15sp" />
 

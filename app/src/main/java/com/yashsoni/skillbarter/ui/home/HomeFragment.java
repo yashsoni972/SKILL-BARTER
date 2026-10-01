@@ -46,6 +46,7 @@ public class HomeFragment extends Fragment {
         sessionManager = new SessionManager(requireContext());
 
         loadHomeData();
+        loadRecommendedPartners();
 
         binding.ivNotification.setOnClickListener(v -> {
             startActivity(new Intent(requireContext(), NotificationsActivity.class));
@@ -72,6 +73,32 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadHomeData();
+        loadRecommendedPartners();
+        loadNotificationBadge();
+    }
+
+    /** Red dot on the bell, driven by the real unread count. */
+    private void loadNotificationBadge() {
+        repository.fetchUnreadCount(new SkillBarterRepository.DataCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer count) {
+                if (binding == null) return;
+                int unread = count == null ? 0 : count;
+                binding.tvNotificationBadge.setVisibility(unread > 0 ? View.VISIBLE : View.GONE);
+                if (unread > 0) {
+                    // 99+ keeps the circle from stretching on a large backlog.
+                    binding.tvNotificationBadge.setText(unread > 99 ? "99+" : String.valueOf(unread));
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                // The bell still works, it just shows no badge.
+                if (binding != null) {
+                    binding.tvNotificationBadge.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     private void loadHomeData() {
@@ -82,20 +109,49 @@ public class HomeFragment extends Fragment {
             binding.tvGreeting.setText("Hello, Skill Barterer 👋");
         }
 
-        Stats stats = repository.getStats();
-        binding.tvUsersCount.setText(String.valueOf(stats.getTotalUsers()));
-        binding.tvActiveCount.setText(String.valueOf(stats.getActiveExchanges()));
-        binding.tvCompletedCount.setText(String.valueOf(stats.getCompletedExchanges()));
+        repository.fetchLiveStats(new SkillBarterRepository.DataCallback<Stats>() {
+            @Override
+            public void onSuccess(Stats stats) {
+                if (binding == null) return;
+                binding.tvUsersCount.setText(String.valueOf(stats.getTotalUsers()));
+                binding.tvActiveCount.setText(String.valueOf(stats.getActiveExchanges()));
+                binding.tvCompletedCount.setText(String.valueOf(stats.getCompletedExchanges()));
+            }
 
-        List<User> recommendedList = repository.getRecommendedUsers();
-        UserAdapter adapter = new UserAdapter(recommendedList, user -> {
-            Intent intent = new Intent(requireContext(), SendRequestActivity.class);
-            intent.putExtra("targetUser", user);
-            startActivity(intent);
+            @Override
+            public void onError(String message) {
+                if (binding == null) return;
+                binding.tvUsersCount.setText("0");
+                binding.tvActiveCount.setText("0");
+                binding.tvCompletedCount.setText("0");
+            }
         });
+    }
 
-        binding.rvRecommended.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvRecommended.setAdapter(adapter);
+    private void loadRecommendedPartners() {
+        repository.fetchRecommendedUsers(new SkillBarterRepository.DataCallback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> users) {
+                if (binding == null) return;
+                if (users.isEmpty()) {
+                    binding.rvRecommended.setAdapter(null);
+                    return;
+                }
+                UserAdapter adapter = new UserAdapter(users, user -> {
+                    Intent intent = new Intent(requireContext(), SendRequestActivity.class);
+                    intent.putExtra("targetUser", user);
+                    startActivity(intent);
+                });
+                binding.rvRecommended.setLayoutManager(new LinearLayoutManager(requireContext()));
+                binding.rvRecommended.setAdapter(adapter);
+            }
+
+            @Override
+            public void onError(String message) {
+                if (binding == null) return;
+                binding.rvRecommended.setAdapter(null);
+            }
+        });
     }
 
     @Override

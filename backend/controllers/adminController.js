@@ -14,21 +14,14 @@ exports.getOverview = async (req, res) => {
     const pendingReports = await Report.countDocuments({ status: 'pending' });
 
     res.json({
-      totalUsers: totalUsers || 128,
-      activeExchanges: activeExchanges || 46,
-      completedExchanges: completedExchanges || 31,
-      marketplaceListings: marketplaceListings || 12,
-      helpRequests: helpRequests || 8,
-      pendingReports: pendingReports || 1
+      totalUsers,
+      activeExchanges,
+      completedExchanges,
+      marketplaceListings,
+      helpRequests,
+      pendingReports
     });
   } catch (err) {
-    res.json({
-      totalUsers: 128,
-      activeExchanges: 46,
-      completedExchanges: 31,
-      marketplaceListings: 12,
-      helpRequests: 8,
-      pendingReports: 1
-    });
+    res.status(500).json({ message: err.message });
   }
 };

@@ -3,6 +3,7 @@ const router = express.Router();
 const sessionController = require('../controllers/sessionController');
 const authMiddleware = require('../middleware/authMiddleware');
 
+router.post('/complete', authMiddleware, sessionController.completeSession);
 router.post('/', authMiddleware, sessionController.createSession);
 router.get('/', authMiddleware, sessionController.getSessions);
 

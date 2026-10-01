@@ -9,6 +9,7 @@ const SessionSchema = new mongoose.Schema({
   time: { type: String, required: true },
   location: { type: String, default: 'Online (Google Meet)' },
   notes: { type: String, default: '' },
+  durationHours: { type: Number, default: 1 },
   status: { type: String, enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled' }
 });
 

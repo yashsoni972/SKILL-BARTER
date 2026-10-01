@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MatchResult implements Serializable {
 
-    @SerializedName("_id")
+    @SerializedName(value = "id", alternate = { "_id" })
     private String id;
     private String name;
     private String email;

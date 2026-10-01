@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 public class Availability implements Serializable {
 
-    @SerializedName("_id")
+    @SerializedName(value = "id", alternate = { "_id" })
     private String id;
     private String userId;
     private String day;

@@ -17,13 +17,14 @@
             android:layout_height="28dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
+            android:contentDescription="@string/credits_title"
             android:src="@drawable/ic_logo" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="💎 Skill Credits Economy"
+            android:text="@string/credits_title"
             android:textColor="@color/text_primary"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -43,7 +44,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="YOUR CREDIT BALANCE"
+            android:text="@string/credits_balance_label"
             android:textColor="@color/primary_light"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -53,7 +54,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="💎 40 Credits"
             android:textColor="@color/white"
             android:textSize="28sp"
             android:textStyle="bold" />
@@ -62,8 +62,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="• Teaching: +10 credits / hour   • Learning: -10 credits / hour"
+            android:gravity="center"
+            android:text="@string/credits_rates"
             android:textColor="@color/white"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvTotals"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textColor="@color/primary_light"
             android:textSize="12sp" />
 
     </LinearLayout>
@@ -73,43 +83,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Recent Credit Transactions"
+        android:text="@string/credits_history_title"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
         android:textStyle="bold" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tvEmpty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/credits_empty"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTransactions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/bg_rounded_card"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="• +40 Credits: Initial Welcome Gift"
-            android:textColor="@color/accent_green"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="• +10 Credits: Taught HTML &amp; CSS session"
-            android:textColor="@color/accent_green"
-            android:textSize="14sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="• -10 Credits: Learned Graphic Design session"
-            android:textColor="@color/primary"
-            android:textSize="14sp" />
-
-    </LinearLayout>
+        android:layout_weight="1" />
 
 </LinearLayout>

@@ -3,7 +3,16 @@ const Availability = require('../models/Availability');
 exports.getAvailability = async (req, res) => {
   try {
     const userId = req.params.userId || req.user.userId;
-    const slots = await Availability.find({ userId });
+    const slots = await Availability.find({ userId }).sort({ day: 1, startTime: 1 });
+    res.json(slots);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getMyAvailability = async (req, res) => {
+  try {
+    const slots = await Availability.find({ userId: req.user.userId }).sort({ day: 1, startTime: 1 });
     res.json(slots);
   } catch (err) {
     res.status(500).json({ message: err.message });

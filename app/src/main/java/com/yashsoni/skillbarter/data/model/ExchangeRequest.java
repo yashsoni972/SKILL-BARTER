@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 
 public class ExchangeRequest implements Serializable {
-    @SerializedName("_id")
+    @SerializedName(value = "id", alternate = { "_id" })
     private String id;
 
     @JsonAdapter(UserRef.class)
@@ -20,6 +20,12 @@ public class ExchangeRequest implements Serializable {
 
     @JsonAdapter(UserRef.class)
     private User receiverId;
+
+    // Resolved server-side: the *other* person in the conversation, regardless
+    // of which tab the request is shown in. Null on older backend deployments.
+    private User partner;
+    private String direction;
+
     private String offeredSkill;
     private String requestedSkill;
     private String message;
@@ -36,6 +42,30 @@ public class ExchangeRequest implements Serializable {
 
     public User getReceiverId() { return receiverId; }
     public void setReceiverId(User receiverId) { this.receiverId = receiverId; }
+
+    public User getPartner() { return partner; }
+    public void setPartner(User partner) { this.partner = partner; }
+
+    public String getDirection() { return direction; }
+    public void setDirection(String direction) { this.direction = direction; }
+
+    /**
+     * The other person in this request. Falls back to the correct side when the
+     * backend has not sent the resolved `partner` field (older deployments), so
+     * a request card can never end up showing the logged-in user.
+     */
+    public User getOtherUser(String currentUserId) {
+        if (partner != null && partner.getId() != null) {
+            return partner;
+        }
+        if (senderId != null && currentUserId != null && currentUserId.equals(senderId.getId())) {
+            return receiverId;
+        }
+        if (receiverId != null && currentUserId != null && currentUserId.equals(receiverId.getId())) {
+            return senderId;
+        }
+        return "incoming".equals(direction) ? senderId : receiverId;
+    }
 
     public String getOfferedSkill() { return offeredSkill; }
     public void setOfferedSkill(String offeredSkill) { this.offeredSkill = offeredSkill; }

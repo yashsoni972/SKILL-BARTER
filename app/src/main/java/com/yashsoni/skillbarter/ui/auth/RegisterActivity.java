@@ -11,7 +11,6 @@ import com.yashsoni.skillbarter.api.ApiClient;
 import com.yashsoni.skillbarter.data.model.AuthResponse;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityRegisterBinding;
-import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
 import java.util.HashMap;
@@ -67,7 +66,6 @@ public class RegisterActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().getUser() != null) {
                     AuthResponse authRes = response.body();
                     User registeredUser = authRes.getUser();
-                    SkillBarterRepository.getInstance(RegisterActivity.this).registerUser(registeredUser);
                     sessionManager.createLoginSession(authRes.getToken(), registeredUser);
                     Toast.makeText(RegisterActivity.this, "🎉 Account Saved to MongoDB Atlas! Welcome " + registeredUser.getName(), Toast.LENGTH_LONG).show();
 

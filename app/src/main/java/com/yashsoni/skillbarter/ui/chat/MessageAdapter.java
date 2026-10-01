@@ -18,9 +18,11 @@ import java.util.List;
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     private final List<Message> messageList;
+    private final String currentUserId;
 
-    public MessageAdapter(List<Message> messageList) {
+    public MessageAdapter(List<Message> messageList, String currentUserId) {
         this.messageList = messageList;
+        this.currentUserId = currentUserId;
     }
 
     @NonNull
@@ -34,9 +36,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messageList.get(position);
         holder.tvMessage.setText(message.getMessage());
-        holder.tvTime.setText(message.getCreatedAt());
+        holder.tvTime.setText(formatTime(message.getCreatedAt()));
 
-        boolean isOut = "curr_user".equals(message.getSenderId());
+        boolean isOut = message.getSenderId() != null && message.getSenderId().equals(currentUserId);
         if (isOut) {
             holder.container.setGravity(Gravity.END);
             holder.bubble.setBackgroundResource(R.drawable.bg_hero_banner);
@@ -52,6 +54,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public int getItemCount() {
         return messageList.size();
+    }
+
+    private String formatTime(String createdAt) {
+        if (createdAt == null || createdAt.isEmpty()) return "";
+        try {
+            long millis = new java.util.Date(createdAt).getTime();
+            return new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault()).format(new java.util.Date(millis));
+        } catch (Exception e) {
+            return createdAt;
+        }
     }
 
     static class MessageViewHolder extends RecyclerView.ViewHolder {
