@@ -81,6 +81,9 @@
             android:name=".ui.credits.CreditsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.exchanges.ExchangesActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.progress.ProgressActivity"
             android:exported="false" />
 

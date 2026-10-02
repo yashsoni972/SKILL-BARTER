@@ -35,6 +35,10 @@
     <string name="requests_already_received">%1$s already sent you a request.</string>
     <string name="requests_awaiting_reply">Awaiting reply</string>
     <string name="requests_awaiting_toast">You already sent a request to %1$s. Waiting for their reply.</string>
+    <string name="requests_no_skills_listed">No skills listed yet</string>
+    <string name="requests_location_unknown">Location not set</string>
+    <string name="requests_skill_fallback">Skill exchange</string>
+    <string name="requests_teach_fallback">Add your skills in your profile</string>
 
     <!-- Review -->
     <string name="review_comment_hint">Add a comment (optional)</string>

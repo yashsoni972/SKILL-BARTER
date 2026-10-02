@@ -15,6 +15,8 @@ import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.chat.ChatActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
+import java.util.List;
+
 public class SendRequestActivity extends AppCompatActivity {
 
     private ActivitySendRequestBinding binding;
@@ -36,16 +38,24 @@ public class SendRequestActivity extends AppCompatActivity {
         }
 
         binding.tvUserName.setText(targetUser.getName());
-        binding.tvUserSkills.setText(String.join(" • ", targetUser.getOfferedSkills()));
-        binding.tvUserLocation.setText("📍 " + targetUser.getLocation());
+        // Gson leaves a field null when the JSON value is null, so the model's
+        // default list is not a guarantee and String.join would throw.
+        List<String> partnerSkills = targetUser.getOfferedSkills();
+        binding.tvUserSkills.setText(partnerSkills == null || partnerSkills.isEmpty()
+                ? getString(R.string.requests_no_skills_listed)
+                : String.join(" • ", partnerSkills));
+        binding.tvUserLocation.setText("📍 " + (targetUser.getLocation() == null
+                ? getString(R.string.requests_location_unknown)
+                : targetUser.getLocation()));
 
-        String want = (targetUser.getOfferedSkills() != null && !targetUser.getOfferedSkills().isEmpty())
-                ? targetUser.getOfferedSkills().get(0) : "Graphic Design";
+        String want = (partnerSkills != null && !partnerSkills.isEmpty())
+                ? partnerSkills.get(0) : getString(R.string.requests_skill_fallback);
         binding.tvWantSkill.setText("🎨 " + want);
 
         User currUser = new SessionManager(this).getUser();
-        String teach = (currUser != null && currUser.getOfferedSkills() != null && !currUser.getOfferedSkills().isEmpty())
-                ? String.join(", ", currUser.getOfferedSkills()) : "HTML & CSS, JavaScript";
+        List<String> mySkills = currUser == null ? null : currUser.getOfferedSkills();
+        String teach = (mySkills != null && !mySkills.isEmpty())
+                ? String.join(", ", mySkills) : getString(R.string.requests_teach_fallback);
         binding.tvTeachSkill.setText("💻 " + teach);
 
         binding.ivBack.setOnClickListener(v -> finish());
