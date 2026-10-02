@@ -87,6 +87,9 @@
             android:name=".ui.schedule.ScheduleSessionActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.chat.PdfViewerActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.progress.ProgressActivity"
             android:exported="false" />
 

@@ -1,6 +1,7 @@
 package com.yashsoni.skillbarter.api;
 
 import com.yashsoni.skillbarter.data.model.AuthResponse;
+import com.yashsoni.skillbarter.data.model.Attachment;
 import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
 import com.yashsoni.skillbarter.data.model.Credit;
@@ -19,6 +20,10 @@ import com.yashsoni.skillbarter.data.model.User;
 
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.MultipartBody;
+import retrofit2.http.Multipart;
+import retrofit2.http.Part;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -82,6 +87,13 @@ public interface ApiService {
 
     @POST("messages")
     Call<Message> sendMessage(@Body Map<String, String> body);
+
+    @Multipart
+    @POST("attachments")
+    Call<Attachment> uploadAttachment(@Part MultipartBody.Part file, @Part("requestId") okhttp3.RequestBody requestId);
+
+    @GET("attachments/{id}/link")
+    Call<Map<String, String>> mintAttachmentLink(@Path("id") String id);
 
     @GET("messages/{userId}")
     Call<List<Message>> getMessages(@Path("userId") String userId);

@@ -3,6 +3,7 @@ package com.yashsoni.skillbarter.repository;
 import android.content.Context;
 import com.yashsoni.skillbarter.api.ApiClient;
 import com.yashsoni.skillbarter.api.ApiService;
+import com.yashsoni.skillbarter.data.model.Attachment;
 import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
 import com.yashsoni.skillbarter.data.model.Conversation;
@@ -331,10 +332,76 @@ public class SkillBarterRepository {
     }
 
     /**
-     * Records a finished session with a real duration so the progress dashboard
-     * shows actual hours instead of placeholders.
+     * Uploads a shared file. requestId may be null when there is no exchange
+     * context; the server still needs one of the two to know who it is for.
      */
-    /**
+    public void uploadAttachment(java.io.File file, String mimeType, String requestId, DataCallback<Attachment> callback) {
+        okhttp3.MediaType parsed = okhttp3.MediaType.parse(mimeType == null ? "application/octet-stream" : mimeType);
+        okhttp3.RequestBody body = okhttp3.RequestBody.create(file, parsed);
+        okhttp3.MultipartBody.Part part = okhttp3.MultipartBody.Part.createFormData("file", file.getName(), body);
+        okhttp3.RequestBody id = okhttp3.RequestBody.create(
+                requestId == null ? "" : requestId, okhttp3.MediaType.parse("text/plain"));
+
+        apiService.uploadAttachment(part, id).enqueue(new Callback<Attachment>() {
+            @Override
+            public void onResponse(Call<Attachment> call, Response<Attachment> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Attachment> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    /** Asks the server for a fresh short-lived download link for a shared file. */
+    public void mintAttachmentLink(String attachmentId, DataCallback<String> callback) {
+        apiService.mintAttachmentLink(attachmentId).enqueue(new Callback<Map<String, String>>() {
+            @Override
+            public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().get("url") != null) {
+                    callback.onSuccess(response.body().get("url"));
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, String>> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    /** Sends a chat message, optionally carrying a file that was uploaded first. */
+    public void sendMessageWithAttachment(String partnerId, String text, String attachmentId, DataCallback<Message> callback) {
+        Map<String, String> body = new HashMap<>();
+        body.put("receiverId", partnerId);
+        body.put("message", text == null ? "" : text);
+        if (attachmentId != null) body.put("attachmentId", attachmentId);
+
+        apiService.sendMessage(body).enqueue(new Callback<Message>() {
+            @Override
+            public void onResponse(Call<Message> call, Response<Message> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Message> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+     /**
      * Records a finished session with a real duration. The backend also moves the
      * credit balance for both sides, so the response carries the new balance and
      * the change that was applied.

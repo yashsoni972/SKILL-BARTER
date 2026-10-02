@@ -109,6 +109,55 @@ session as teacher (balance must rise by 10/hour) and the learner's must fall �
 confirm a repeat completion is refused → check `/requests/exchanges`,
 `/users/progress`, `/notifications`, `/notifications/unread-count`, `/reviews/mine`.
 
+## Duplicates: dedupe by partner, keep latest
+
+Every reject-and-retry used to create a new `ExchangeRequest` row, so the backend
+returned the whole history and the UI showed one partner several times. `requests`
+incoming/outgoing, `/requests/exchanges` and `/messages/conversations` now collapse to
+the newest row per partner. The old rows stay in MongoDB on purpose (audit trail);
+only the responses are deduped. Do not "fix" this by deleting history.
+
+## Edge-to-edge insets (Android 15 / targetSdk 35)
+
+The app targets SDK 35, so Android 15+ forces edge-to-edge and the app was drawing
+under the status and gesture bars. `utils/SystemBars.apply(root)` adds the padding
+for status/cutout, navigation bars and the IME. It is called in **every** activity —
+a new activity that skips it will look broken on a real phone. Chat additionally
+needs a multiline, keyboard-safe input; `PasswordToggle.attach(field, eyeButton)`
+gives login and register their show/hide eye.
+
+## Shared files (chat attachments)
+
+Decisions taken, so they are not relitigated:
+
+- Storage is **MongoDB GridFS**, not disk. Render's free tier disk is ephemeral and
+  would lose every upload on the next deploy. Costs Atlas quota (512 MB free tier),
+  so revisit Cloudinary/S3 if usage grows.
+- Allowed: PDF, doc/docx, xls/xlsx, jpg/jpeg, png. 10 MB cap. Enforced by mime
+  **or** extension, because Android pickers often report a generic mimetype.
+- **Downloads need a signed link.** `authMiddleware` requires an `Authorization`
+  header, which Google Docs / a browser / a PDF viewer cannot send. `GET
+  /attachments/:id` therefore accepts `?t=` — a 15-minute token scoped to that one
+  file — as well as a normal JWT. `GET /attachments/:id/link` mints a fresh one when
+  a user taps a file whose embedded link has expired.
+- In-app viewing: images via Glide (already a dependency, no OkHttp integration, so
+  they load from the signed URL), PDF via Android's built-in `PdfRenderer`. Word and
+  Excel are handed to whatever app the phone has.
+- `Message.message` is **optional** now. A message must have text *or* `attachmentId`
+  or the server returns 400. The chats list previews `📎 Attachment` when there is no
+  text, otherwise the row looks blank.
+
 ## Commit style
 
 Short imperative subject, one feature per commit, e.g. `Connect exchange requests to MongoDB Atlas and fix live API connectivity`. Never commit secrets or the APK binary without asking.
+
+## How to verify a change
+
+```
+.\gradlew.bat --stop                                        # once, see build gotcha
+.\gradlew.bat app:assembleDebug --no-configuration-cache
+.\gradlew.bat app:testDebugUnitTest app:lintDebug --no-configuration-cache
+```
+
+`lintDebug` reports ~371 informational issues (dependency upgrades, `DefaultLocale`)
+and still passes. Do not treat that count as a regression signal.

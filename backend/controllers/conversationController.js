@@ -3,6 +3,12 @@ const ExchangeRequest = require('../models/ExchangeRequest');
 
 const USER_FIELDS = 'name email location rating profileImage bio totalExchanges';
 
+// A file shared with no caption still needs something to show in the chat list.
+function preview(last) {
+  if (last.message) return last.message;
+  return last.attachmentId ? '📎 Attachment' : '';
+}
+
 // Returns one entry per distinct partner for the given user, containing the most
 // recent message exchanged with them. Drives the Chats tab so it lists real
 // conversations instead of every registered user.
@@ -59,7 +65,7 @@ exports.getConversations = async (req, res) => {
         },
         requestId: r._id,
         status: r.status,
-        lastMessage: last ? last.message : '',
+        lastMessage: last ? preview(last) : '',
         lastMessageAt: last ? last.createdAt : null,
         lastMessageMine: last ? String(last.senderId) === String(me) : false,
         unreadCount: await Message.countDocuments({

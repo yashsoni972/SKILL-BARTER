@@ -9,6 +9,8 @@ public class Message implements Serializable {
     private String senderId;
     private String receiverId;
     private String message;
+    @SerializedName("attachmentId") private String attachmentId;
+    @SerializedName("attachment") private Attachment attachment;
     private boolean read;
     private String createdAt;
 
@@ -32,6 +34,12 @@ public class Message implements Serializable {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
+    public String getAttachmentId() { return attachmentId; }
+    public void setAttachmentId(String attachmentId) { this.attachmentId = attachmentId; }
+
+    public Attachment getAttachment() { return attachment; }
+    public void setAttachment(Attachment attachment) { this.attachment = attachment; }
 
     public boolean isRead() { return read; }
     public void setRead(boolean read) { this.read = read; }

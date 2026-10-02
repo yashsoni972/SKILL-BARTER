@@ -11,6 +11,7 @@ import com.yashsoni.skillbarter.api.ApiClient;
 import com.yashsoni.skillbarter.data.model.AuthResponse;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityRegisterBinding;
+import com.yashsoni.skillbarter.utils.PasswordToggle;
 import com.yashsoni.skillbarter.utils.SessionManager;
 import com.yashsoni.skillbarter.utils.SystemBars;
 
@@ -32,6 +33,8 @@ public class RegisterActivity extends AppCompatActivity {
         binding = ActivityRegisterBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         SystemBars.apply(binding.getRoot());
+
+        PasswordToggle.attach(binding.etPassword, binding.btnTogglePassword);
 
         sessionManager = new SessionManager(this);
 
