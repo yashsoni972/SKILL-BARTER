@@ -1,7 +1,33 @@
 const User = require('../models/User');
+const Skill = require('../models/Skill');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const creditService = require('./creditController');
+
+/**
+ * Builds the user payload sent with register/login.
+ *
+ * Skills live in their own collection, not on the User document, so they have to
+ * be looked up separately. They must be included here because the app stores this
+ * object as the signed-in user and every skill-driven screen (profile, discover,
+ * send request) reads its lists from it.
+ */
+async function buildUserPayload(user) {
+  const skills = await Skill.find({ userId: user._id }).lean();
+
+  return {
+    _id: user._id,
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    location: user.location,
+    bio: user.bio,
+    rating: user.rating,
+    totalExchanges: user.totalExchanges,
+    offeredSkills: skills.filter(s => s.type === 'offer').map(s => s.skillName),
+    wantedSkills: skills.filter(s => s.type === 'want').map(s => s.skillName)
+  };
+}
 
 exports.register = async (req, res) => {
   try {
@@ -40,16 +66,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       token,
-      user: {
-        _id: user._id,
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        location: user.location,
-        bio: user.bio,
-        rating: user.rating,
-        totalExchanges: user.totalExchanges
-      }
+      user: await buildUserPayload(user)
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -77,16 +94,7 @@ exports.login = async (req, res) => {
 
     res.json({
       token,
-      user: {
-        _id: user._id,
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        location: user.location,
-        bio: user.bio,
-        rating: user.rating,
-        totalExchanges: user.totalExchanges
-      }
+      user: await buildUserPayload(user)
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

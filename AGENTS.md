@@ -48,7 +48,7 @@ Auth (register/login/profile), stats, recommended partners, discover matches, ex
 - `sessions` `/sessions` `/sessions/schedule` `/sessions/:id/complete`
 - `credits` `/credits/me` `/credits/transactions`
 - `notifications` `/notifications` `/notifications/unread-count` `/notifications/read-all`
-- `reviews` `/reviews/add` `/reviews/mine` `/reviews/user/:userId`
+- `reviews` `/reviews/add` `/reviews/mine` `/reviews/:userId`
 
 ## Credit economy
 
@@ -76,6 +76,38 @@ Local `node server.js` cannot reach MongoDB Atlas from this machine
 (`querySrv ECONNREFUSED ... _mongodb._tcp.cluster0...`), so end-to-end DB tests must
 run against Render after push. Auth-free route checks still return 401, which proves
 route wiring.
+
+## Field names the app sends (confirmed end-to-end)
+
+- `POST /requests` → `receiverId`, `offeredSkill`, `requestedSkill`, `message`
+- `POST /reviews` → `reviewedUserId` (**not** `revieweeId`)
+- `POST /sessions/complete` → `requestId`, `durationHours`, `skill`, `iTaught`
+- `GET /reviews/:userId` is the partner's reviews; there is no `/reviews/user/:userId`
+
+A missing required field used to surface as a Mongoose 500, so these are now
+validated into 400s with a readable message.
+
+## Build gotcha that will bite again
+
+`org.gradle.java.home` in `gradle.properties` does **not** affect AGP's jlink
+lookup, so a clean build fails with
+`JdkImageTransform: jlink executable ...redhat.java...\bin\jlink.exe does not exist`.
+The daemon caches its JVM at startup, so setting `JAVA_HOME` is not enough until the
+old daemon is stopped:
+
+```
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio1\jbr"
+.\gradlew.bat --stop
+.\gradlew.bat app:assembleDebug --no-configuration-cache
+```
+
+## End-to-end check to run after any backend deploy
+
+Register two throwaway accounts, add skills, then: send a request → confirm a second
+is refused with 409 → accept → confirm `canChat:true` → send a message → complete a
+session as teacher (balance must rise by 10/hour) and the learner's must fall →
+confirm a repeat completion is refused → check `/requests/exchanges`,
+`/users/progress`, `/notifications`, `/notifications/unread-count`, `/reviews/mine`.
 
 ## Commit style
 

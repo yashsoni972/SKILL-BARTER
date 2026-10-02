@@ -41,6 +41,12 @@ exports.sendRequest = async (req, res) => {
     const me = req.user.userId;
     const { receiverId, offeredSkill, requestedSkill, message } = req.body;
 
+    // Both skill names are required by the schema. Validating here turns a
+    // missing field into a clear 400 instead of a Mongoose 500.
+    if (!offeredSkill || !requestedSkill) {
+      return res.status(400).json({ message: 'Both an offered skill and a requested skill are required.' });
+    }
+
     if (String(receiverId) === String(me)) {
       return res.status(400).json({ message: 'You cannot send an exchange request to yourself.' });
     }
