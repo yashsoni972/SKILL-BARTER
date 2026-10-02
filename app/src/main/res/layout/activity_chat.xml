@@ -8,13 +8,15 @@
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:background="@color/surface_white"
         android:elevation="2dp"
         android:gravity="center_vertical"
+        android:minHeight="60dp"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
 
         <ImageView
             android:id="@+id/ivBack"
@@ -38,17 +40,18 @@
 
             <TextView
                 android:id="@+id/tvUserName"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text=""
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <TextView
+<TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🟢 Online"
+                android:text="Online"
                 android:textColor="@color/accent_green"
                 android:textSize="12sp" />
 
@@ -90,12 +93,18 @@
         <EditText
             android:id="@+id/etMessage"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/bg_rounded_card"
+            android:gravity="center_vertical"
             android:hint="Type a message..."
-            android:inputType="text"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxHeight="120dp"
+            android:maxLines="4"
+            android:minHeight="44dp"
             android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
             android:textColor="@color/text_primary"
             android:textSize="14sp" />
 
@@ -105,6 +114,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_hero_banner"
+            android:contentDescription="Send message"
             android:padding="10dp"
             android:src="@drawable/ic_send" />
 

@@ -150,6 +150,18 @@
             android:textColor="@color/text_primary"
             android:textSize="15sp" />
 
+        <!-- Only shown once a session has been scheduled. -->
+        <Button
+            android:id="@+id/meetButton"
+            style="@style/Widget.SkillBarter.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:minHeight="50dp"
+            android:text="@string/exchange_join_meet"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <View

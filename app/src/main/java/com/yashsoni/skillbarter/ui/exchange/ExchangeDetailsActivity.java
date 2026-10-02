@@ -1,7 +1,10 @@
 package com.yashsoni.skillbarter.ui.exchange;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -14,6 +17,7 @@ import com.yashsoni.skillbarter.databinding.ActivityExchangeDetailsBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.review.RateReviewActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 import com.yashsoni.skillbarter.utils.TimeFormat;
 
 import java.util.List;
@@ -36,6 +40,7 @@ public class ExchangeDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityExchangeDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 
@@ -104,17 +109,38 @@ public class ExchangeDetailsActivity extends AppCompatActivity {
                 if (!date.isEmpty()) {
                     binding.tvDate.setText(getString(R.string.exchange_date_label, date));
                 }
-                String time = match.getTime();
+                String time = match.getWhenLabel();
                 if (time != null && !time.isEmpty()) {
                     binding.tvTime.setText(getString(R.string.exchange_time_label, time));
                 }
                 binding.tvLocation.setText(getString(R.string.exchange_location_label,
                         match.getLocation() != null ? match.getLocation() : MEDIUM));
+
+                showMeetLink(match);
             }
 
             @Override
             public void onError(String message) {
                 // Keep the unscheduled defaults; the screen stays usable.
+            }
+        });
+    }
+
+    /**
+     * Shows the Google Meet room for this session. The button is only created once
+     * a session actually exists, and it always opens a real room: an explicit link
+     * when one was agreed, otherwise Google creates one on demand.
+     */
+    private void showMeetLink(Session session) {
+        if (binding.meetButton.getVisibility() == View.VISIBLE) return;
+
+        binding.meetButton.setVisibility(View.VISIBLE);
+        binding.meetButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(session.getMeetLink()));
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, "No app can open this link.", Toast.LENGTH_LONG).show();
             }
         });
     }

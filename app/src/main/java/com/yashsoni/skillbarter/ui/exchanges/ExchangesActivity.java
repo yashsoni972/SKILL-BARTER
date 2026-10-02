@@ -17,6 +17,7 @@ import com.yashsoni.skillbarter.ui.chat.ChatActivity;
 import com.yashsoni.skillbarter.ui.exchange.ExchangeDetailsActivity;
 import com.yashsoni.skillbarter.ui.review.RateReviewActivity;
 
+import com.yashsoni.skillbarter.utils.SystemBars;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class ExchangesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityExchangesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

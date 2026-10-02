@@ -39,6 +39,7 @@
     <string name="requests_location_unknown">Location not set</string>
     <string name="requests_skill_fallback">Skill exchange</string>
     <string name="requests_teach_fallback">Add your skills in your profile</string>
+    <string name="exchange_join_meet">Join on Google Meet</string>
 
     <!-- Review -->
     <string name="review_comment_hint">Add a comment (optional)</string>

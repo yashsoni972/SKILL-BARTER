@@ -16,6 +16,7 @@ import com.yashsoni.skillbarter.R;
 import com.yashsoni.skillbarter.databinding.ActivityOnboardingBinding;
 import com.yashsoni.skillbarter.ui.auth.LoginActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class OnboardingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityOnboardingBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         sessionManager = new SessionManager(this);
 

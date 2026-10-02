@@ -12,6 +12,7 @@ import com.yashsoni.skillbarter.data.model.AuthResponse;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityRegisterBinding;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityRegisterBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         sessionManager = new SessionManager(this);
 

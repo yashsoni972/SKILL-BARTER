@@ -9,6 +9,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityAddSkillsBinding;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class AddSkillsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityAddSkillsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         sessionManager = new SessionManager(this);
 

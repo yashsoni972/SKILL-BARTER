@@ -12,6 +12,7 @@ import com.yashsoni.skillbarter.databinding.ActivityMarketplaceBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.requests.SendRequestActivity;
 
+import com.yashsoni.skillbarter.utils.SystemBars;
 import java.util.List;
 
 public class MarketplaceActivity extends AppCompatActivity {
@@ -24,6 +25,7 @@ public class MarketplaceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMarketplaceBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

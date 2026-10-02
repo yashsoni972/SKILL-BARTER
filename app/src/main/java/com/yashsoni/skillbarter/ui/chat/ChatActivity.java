@@ -13,12 +13,16 @@ import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityChatBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.exchange.ExchangeDetailsActivity;
+import com.yashsoni.skillbarter.ui.schedule.ScheduleSessionActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
+
+    private static final int REQUEST_SCHEDULE = 1001;
 
     private ActivityChatBinding binding;
     private SkillBarterRepository repository;
@@ -35,6 +39,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 
@@ -101,15 +106,36 @@ public class ChatActivity extends AppCompatActivity {
             });
         });
 
+        // Agreeing a date and time is the point of this button, so it goes straight to
+        // the scheduling screen. Exchange details stay reachable from there.
         binding.btnSchedule.setOnClickListener(v -> {
-            Intent intent = new Intent(ChatActivity.this, ExchangeDetailsActivity.class);
-            intent.putExtra("partnerUser", partnerUser);
+            Intent intent = new Intent(ChatActivity.this, ScheduleSessionActivity.class);
             intent.putExtra("requestId", requestId);
-            intent.putExtra("requestedSkill", requestedSkill);
-            intent.putExtra("offeredSkill", offeredSkill);
-            intent.putExtra("direction", direction);
-            startActivity(intent);
+            intent.putExtra("partnerName", partnerUser.getName());
+            intent.putExtra("skill", teachingOrLearning());
+            startActivityForResult(intent, REQUEST_SCHEDULE);
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_SCHEDULE && resultCode == RESULT_OK) {
+            Toast.makeText(this, "Session scheduled", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * The skill this member is teaching in this exchange, falling back to the one
+     * they asked for. Used as the subject line for the booked session.
+     */
+    private String teachingOrLearning() {
+        boolean iAmSender = "outgoing".equals(direction);
+        String taught = iAmSender ? offeredSkill : requestedSkill;
+        String learned = iAmSender ? requestedSkill : offeredSkill;
+        if (taught != null && !taught.trim().isEmpty()) return taught;
+        if (learned != null && !learned.trim().isEmpty()) return learned;
+        return "Skill exchange";
     }
 
     private void loadMessages() {

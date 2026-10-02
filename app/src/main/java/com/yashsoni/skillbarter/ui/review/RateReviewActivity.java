@@ -10,6 +10,7 @@ import com.yashsoni.skillbarter.data.model.Review;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityRateReviewBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 /**
  * Submits a real review to POST /reviews. The screen previously only displayed
@@ -27,6 +28,7 @@ public class RateReviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityRateReviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

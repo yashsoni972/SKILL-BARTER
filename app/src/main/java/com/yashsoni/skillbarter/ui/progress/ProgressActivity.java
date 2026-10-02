@@ -13,6 +13,7 @@ import com.yashsoni.skillbarter.data.model.Progress;
 import com.yashsoni.skillbarter.databinding.ActivityProgressBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 
+import com.yashsoni.skillbarter.utils.SystemBars;
 import java.util.List;
 
 public class ProgressActivity extends AppCompatActivity {
@@ -25,6 +26,7 @@ public class ProgressActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityProgressBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

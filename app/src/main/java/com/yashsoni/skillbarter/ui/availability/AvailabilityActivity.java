@@ -17,6 +17,7 @@ import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.databinding.ActivityAvailabilityBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 
+import com.yashsoni.skillbarter.utils.SystemBars;
 import java.util.List;
 
 public class AvailabilityActivity extends AppCompatActivity implements AvailabilityAdapter.OnDeleteListener {
@@ -38,6 +39,7 @@ public class AvailabilityActivity extends AppCompatActivity implements Availabil
         super.onCreate(savedInstanceState);
         binding = ActivityAvailabilityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

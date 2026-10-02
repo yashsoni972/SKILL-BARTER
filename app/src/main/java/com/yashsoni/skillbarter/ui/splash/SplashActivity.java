@@ -12,6 +12,7 @@ import com.yashsoni.skillbarter.databinding.ActivitySplashBinding;
 import com.yashsoni.skillbarter.ui.auth.LoginActivity;
 import com.yashsoni.skillbarter.ui.onboarding.OnboardingActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -23,6 +24,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         sessionManager = new SessionManager(this);
 

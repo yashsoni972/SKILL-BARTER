@@ -12,6 +12,7 @@ import com.yashsoni.skillbarter.data.model.Credit;
 import com.yashsoni.skillbarter.databinding.ActivityCreditsBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 
+import com.yashsoni.skillbarter.utils.SystemBars;
 import java.util.List;
 
 /**
@@ -30,6 +31,7 @@ public class CreditsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityCreditsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

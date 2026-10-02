@@ -11,6 +11,7 @@ import com.yashsoni.skillbarter.ui.discover.DiscoverFragment;
 import com.yashsoni.skillbarter.ui.home.HomeFragment;
 import com.yashsoni.skillbarter.ui.profile.ProfileFragment;
 import com.yashsoni.skillbarter.ui.requests.RequestsFragment;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         loadFragment(new HomeFragment());
 

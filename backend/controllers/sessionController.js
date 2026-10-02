@@ -119,10 +119,20 @@ exports.completeSession = async (req, res) => {
 exports.createSession = async (req, res) => {
   try {
     const me = req.user.userId;
-    const { requestId, partnerUserId, skill, date, time, notes } = req.body;
+    const { requestId, partnerUserId, skill, date, time, dayOfWeek, startTime, endTime, meetLink, notes } = req.body;
 
     if (!skill || !date || !time) {
       return res.status(400).json({ message: 'skill, date and time are required' });
+    }
+
+    // A meeting needs a real room. When the host has not supplied one, fall back
+    // to Google's on-demand link so the button still opens a working meeting.
+    let meet = (meetLink || '').trim();
+    if (meet && !/^https?:\/\//i.test(meet)) {
+      meet = 'https://' + meet;
+    }
+    if (!meet) {
+      meet = 'https://meet.google.com/new';
     }
 
     let partnerId = partnerUserId;
@@ -149,6 +159,10 @@ exports.createSession = async (req, res) => {
       skill,
       date,
       time,
+      dayOfWeek: dayOfWeek || '',
+      startTime: startTime || time,
+      endTime: endTime || '',
+      meetLink: meet,
       location: MEDIUM,
       notes: notes || '',
       durationHours: 1,

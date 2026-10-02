@@ -596,6 +596,41 @@ public class SkillBarterRepository {
         });
     }
 
+    /**
+     * Books a session for an accepted exchange. The day, the start and end times
+     * and the Google Meet room are agreed by both members, so they are all sent
+     * through to the backend rather than being assumed.
+ */
+    public void scheduleSession(String requestId, String skill, String date, String dayOfWeek,
+                                String startTime, String endTime, String meetLink,
+                                DataCallback<Session> callback) {
+        Map<String, String> body = new HashMap<>();
+        body.put("requestId", requestId);
+        body.put("skill", skill);
+        body.put("date", date);
+        body.put("time", startTime);
+        body.put("dayOfWeek", dayOfWeek);
+        body.put("startTime", startTime);
+        body.put("endTime", endTime);
+        body.put("meetLink", meetLink);
+
+        apiService.createSession(body).enqueue(new Callback<Session>() {
+            @Override
+            public void onResponse(Call<Session> call, Response<Session> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Session> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
     /** Partner ids the user has already reviewed, so the UI can show Rated. */
     public void fetchSessions(DataCallback<List<Session>> callback) {
         apiService.getSessions().enqueue(new Callback<List<Session>>() {

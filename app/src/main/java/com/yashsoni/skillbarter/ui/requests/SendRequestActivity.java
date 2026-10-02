@@ -14,6 +14,7 @@ import com.yashsoni.skillbarter.databinding.ActivitySendRequestBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.chat.ChatActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SystemBars;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class SendRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySendRequestBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 

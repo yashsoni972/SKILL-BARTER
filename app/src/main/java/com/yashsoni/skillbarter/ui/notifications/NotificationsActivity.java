@@ -13,6 +13,7 @@ import com.yashsoni.skillbarter.data.model.Notification;
 import com.yashsoni.skillbarter.databinding.ActivityNotificationsBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 
+import com.yashsoni.skillbarter.utils.SystemBars;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityNotificationsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        SystemBars.apply(binding.getRoot());
 
         repository = SkillBarterRepository.getInstance(this);
 
