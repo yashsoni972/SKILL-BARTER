@@ -36,6 +36,33 @@ function withPartner(requests, direction) {
   });
 }
 
+/**
+ * A member pair shares ONE exchange, but the database keeps one row per attempt
+ * (a rejected request may be sent again later). Returning every row makes the
+ * same person appear several times in the requests list and in the chat list, so
+ * only the newest attempt per partner is kept.
+ *
+ * Callers must pass the rows newest-first, which every query in this controller
+ * does with `sort({ createdAt: -1 })`.
+ */
+function dedupeByPartner(requests, me) {
+  const seen = new Set();
+  const kept = [];
+
+  for (const r of requests) {
+    const sender = r.senderId && r.senderId._id ? r.senderId._id : r.senderId;
+    const receiver = r.receiverId && r.receiverId._id ? r.receiverId._id : r.receiverId;
+    const other = String(sender) === String(me) ? receiver : sender;
+    const key = String(other);
+
+    if (!key || key === 'undefined' || key === 'null' || seen.has(key)) continue;
+    seen.add(key);
+    kept.push(r);
+  }
+
+  return kept;
+}
+
 exports.sendRequest = async (req, res) => {
   try {
     const me = req.user.userId;
@@ -109,7 +136,7 @@ exports.getIncomingRequests = async (req, res) => {
       .populate('senderId', USER_FIELDS)
       .populate('receiverId', USER_FIELDS)
       .sort({ createdAt: -1 });
-    res.json(withPartner(requests, 'incoming'));
+    res.json(withPartner(dedupeByPartner(requests, req.user.userId), 'incoming'));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -121,7 +148,7 @@ exports.getOutgoingRequests = async (req, res) => {
       .populate('senderId', USER_FIELDS)
       .populate('receiverId', USER_FIELDS)
       .sort({ createdAt: -1 });
-    res.json(withPartner(requests, 'outgoing'));
+    res.json(withPartner(dedupeByPartner(requests, req.user.userId), 'outgoing'));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -147,7 +174,7 @@ exports.getMyExchanges = async (req, res) => {
 
     const exchanges = [];
 
-    for (const r of requests) {
+    for (const r of dedupeByPartner(requests, me)) {
       const iAmSender = String(r.senderId && r.senderId._id) === String(me);
       const partner = iAmSender ? r.receiverId : r.senderId;
       if (!partner || !partner._id) continue;

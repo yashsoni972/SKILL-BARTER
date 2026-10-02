@@ -20,12 +20,21 @@ exports.getConversations = async (req, res) => {
 
     const conversations = [];
 
+    // A pair can have several request rows (rejected then retried, completed then
+    // started again). Only the newest one per partner may produce a chat entry,
+    // otherwise the same person is listed more than once.
+    const seenPartners = new Set();
+
     for (const r of requests) {
       const partner = r.senderId && r.senderId._id && String(r.senderId._id) === String(me)
         ? r.receiverId
         : r.senderId;
 
       if (!partner || !partner._id) continue;
+
+      const partnerKey = String(partner._id);
+      if (seenPartners.has(partnerKey)) continue;
+      seenPartners.add(partnerKey);
 
       const msgs = await Message.find({
         $or: [
