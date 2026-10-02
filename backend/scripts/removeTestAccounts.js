@@ -52,6 +52,7 @@ const TEST_EMAIL_PATTERNS = [
   /^fa\./i,
   /^fb\./i,
   /^diagnostic/i,
+  /^diagtest/i,
   /^dummy/i,
   /^test\d*@/i,
   /@t\.com$/i
@@ -61,9 +62,13 @@ async function run() {
   await mongoose.connect(MONGO_URI);
   console.log('Connected to MongoDB.');
 
-  const User = mongoose.model('User', new mongoose.Schema({}, { strict: false }), 'User');
+  // Mongoose pluralises and lower-cases model names only when the collection is
+  // NOT passed explicitly. Passing 'User' created a phantom empty "User"
+  // collection, so this script used to report 0 accounts and delete nothing.
+  // These names are the real collections in MongoDB.
+  const coll = name => mongoose.connection.db.collection(name);
 
-  const all = await User.find({}).lean();
+  const all = await coll('users').find({}).toArray();
   console.log(`Total accounts currently in the database: ${all.length}\n`);
 
   const isSeed = u => SEED_EMAILS.includes(String(u.email || '').toLowerCase());
@@ -100,36 +105,31 @@ async function run() {
   const either = { $in: ids };
 
   const results = await Promise.all([
-    User.deleteMany({ _id: inIds }),
-    mongoose.model('Skill', new mongoose.Schema({}, { strict: false }), 'Skill').deleteMany({ userId: either }),
-    mongoose.model('ExchangeRequest', new mongoose.Schema({}, { strict: false }), 'ExchangeRequest')
-      .deleteMany({ $or: [{ senderId: either }, { receiverId: either }] }),
-    mongoose.model('Message', new mongoose.Schema({}, { strict: false }), 'Message')
-      .deleteMany({ $or: [{ senderId: either }, { receiverId: either }] }),
-    mongoose.model('Session', new mongoose.Schema({}, { strict: false }), 'Session')
-      .deleteMany({ $or: [{ hostUserId: either }, { partnerUserId: either }] }),
-    mongoose.model('Notification', new mongoose.Schema({}, { strict: false }), 'Notification').deleteMany({ userId: either }),
-    mongoose.model('SkillCredit', new mongoose.Schema({}, { strict: false }), 'SkillCredit').deleteMany({ userId: either }),
-    mongoose.model('CreditTransaction', new mongoose.Schema({}, { strict: false }), 'CreditTransaction').deleteMany({ userId: either }),
-    mongoose.model('Review', new mongoose.Schema({}, { strict: false }), 'Review')
-      .deleteMany({ $or: [{ reviewerId: either }, { reviewedUserId: either }] }),
-    mongoose.model('Availability', new mongoose.Schema({}, { strict: false }), 'Availability').deleteMany({ userId: either }),
-    mongoose.model('UserBadge', new mongoose.Schema({}, { strict: false }), 'UserBadge').deleteMany({ userId: either }),
-    mongoose.model('SkillListing', new mongoose.Schema({}, { strict: false }), 'SkillListing').deleteMany({ userId: either }),
-    mongoose.model('HelpRequest', new mongoose.Schema({}, { strict: false }), 'HelpRequest').deleteMany({ userId: either }),
-    mongoose.model('Report', new mongoose.Schema({}, { strict: false }), 'Report').deleteMany({ reportedUserId: either })
+    coll('users').deleteMany({ _id: inIds }),
+    coll('skills').deleteMany({ userId: either }),
+    coll('exchangerequests').deleteMany({ $or: [{ senderId: either }, { receiverId: either }] }),
+    coll('messages').deleteMany({ $or: [{ senderId: either }, { receiverId: either }] }),
+    coll('sessions').deleteMany({ $or: [{ hostUserId: either }, { partnerUserId: either }] }),
+    coll('notifications').deleteMany({ userId: either }),
+    coll('skillcredits').deleteMany({ userId: either }),
+    coll('credittransactions').deleteMany({ userId: either }),
+    coll('reviews').deleteMany({ $or: [{ reviewerId: either }, { reviewedUserId: either }] }),
+    coll('availabilities').deleteMany({ userId: either }),
+    coll('userbadges').deleteMany({ userId: either }),
+    coll('skilllistings').deleteMany({ userId: either }),
+    coll('helprequests').deleteMany({ userId: either })
   ]);
 
   const labels = [
     'users', 'skills', 'requests', 'messages', 'sessions', 'notifications',
     'creditBalances', 'creditTransactions', 'reviews', 'availability',
-    'userBadges', 'listings', 'helpRequests', 'reports'
+    'userBadges', 'listings', 'helpRequests'
   ];
 
   console.log('Deleted:');
   results.forEach((r, i) => console.log(`  ${labels[i]}: ${r.deletedCount}`));
 
-  const remaining = await User.find({}).lean();
+  const remaining = await coll('users').find({}).toArray();
   console.log(`\nRemaining accounts: ${remaining.length}`);
   remaining.forEach(u => console.log(`  - ${u.name || '(no name)'}  <${u.email}>`));
 
