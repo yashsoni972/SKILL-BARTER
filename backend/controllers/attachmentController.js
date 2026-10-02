@@ -22,6 +22,18 @@ const ALLOWED = {
   'image/png': '.png'
 };
 
+// Used to recover the real content type when a client sends a wrong or empty
+// mimetype, which Android's document picker often does.
+const EXT_TO_MIME = {
+  '.pdf': 'application/pdf',
+  '.doc': 'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xls': 'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.jpg': 'image/jpeg',
+  '.png': 'image/png'
+};
+
 // Memory storage keeps the request simple; the size cap makes this safe.
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -84,10 +96,13 @@ exports.attachmentAccess = function (req, res, next) {
 }
 
 /** Absolute URL an external viewer can actually open, with a fresh token. */
-exports.buildDownloadUrl = function (req, attachment, userId) {
+function buildDownloadUrl(req, attachment, userId) {
   const token = signDownloadToken(attachment._id, userId);
   return `${req.protocol}://${req.get('host')}/api/attachments/${attachment._id}?t=${encodeURIComponent(token)}`;
-};
+}
+
+// Also exposed so messageController can embed a link inside a chat bubble.
+exports.buildDownloadUrl = buildDownloadUrl;
 
 /**
  * Hands out a fresh signed link on demand, so tapping a file hours later still
@@ -107,7 +122,7 @@ exports.mintLink = async (req, res) => {
       return res.status(403).json({ message: 'This file was not shared with you.' });
     }
 
-    res.json({ url: exports.buildDownloadUrl(req, attachment, me) });
+    res.json({ url: buildDownloadUrl(req, attachment, me) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -150,13 +165,13 @@ exports.uploadAttachment = [
       }
 
       const extension = path.extname(req.file.originalname || '').toLowerCase();
-      const mimeType = (req.file.mimetype || '').toLowerCase();
-      const allowedByMime = ALLOWED[mimeType];
-      const allowedByExtension = Object.values(ALLOWED).includes(extension);
+      const reportedMime = (req.file.mimetype || '').toLowerCase().split(';')[0].trim();
+      const mimeIsKnown = Object.prototype.hasOwnProperty.call(ALLOWED, reportedMime);
+      const extensionIsKnown = Boolean(EXT_TO_MIME[extension]);
 
       // Some Android pickers report an empty or generic mimetype, so an
       // acceptable extension is accepted as well. Both unknown means refuse.
-      if (!allowedByMime && !allowedByExtension) {
+      if (!mimeIsKnown && !extensionIsKnown) {
         return res.status(400).json({
           message: 'Only PDF, Word (doc/docx), Excel (xls/xlsx), JPG and PNG files are supported.'
         });
@@ -167,7 +182,9 @@ exports.uploadAttachment = [
         return res.status(target.code).json({ message: target.error });
       }
 
-      const finalType = allowedByMime || mimeType;
+      // Store a real content type, never an extension: the Android client
+      // switches on it to pick the in-app PDF viewer versus an external app.
+      const finalType = mimeIsKnown ? reportedMime : EXT_TO_MIME[extension];
       const storedName = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${extension || ''}`;
       const fileId = await storeInGridFS(req.file.buffer, storedName, finalType);
 

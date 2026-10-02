@@ -36,13 +36,13 @@ Copy it to the repo root as `skillbarter.apk` after every successful build — t
 
 ## Wired to the live API
 
-Auth (register/login/profile), stats, recommended partners, discover matches, exchange requests (send/incoming/outgoing/accept/reject/complete), chat messages + conversations, availability (list/add/delete), progress dashboard, badges, marketplace listings, help requests, session completion.
+Auth (register/login), profile (`/users/profile`), stats, recommended partners, discover matches, exchange requests (send/incoming/outgoing/accept/reject/complete), chat messages + conversations, chat attachments (GridFS), availability (list/add/delete), progress dashboard, badges, marketplace listings, help requests, session completion.
 
 ## Backend route map (must match the app, verify with `node --check`)
 
-- `auth` `/auth/register` `/auth/login` `/auth/profile`
+- `auth` `/auth/register` `/auth/login` — profile is **not** here, it lives at `users /users/profile`
 - `requests` `/requests/send` `/requests/incoming` `/requests/outgoing` `/requests/exchanges` `/requests/with/:userId` `/requests/:id/accept|reject|complete`
-- `messages` `/messages/conversations` `/messages/:userId` `/messages/send`
+- `messages` `/messages/conversations` `/messages/:userId` and `POST /messages` (there is no `/messages/send`)
 - `users` `/users/progress` `/users/stats` `/users/badges` `/users/match-suggestions` `/users/discover`
 - `availability` `/availability/me` `/availability` `/availability/:day`
 - `sessions` `/sessions` `/sessions/schedule` `/sessions/:id/complete`

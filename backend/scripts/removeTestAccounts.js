@@ -20,10 +20,12 @@
  */
 require('dotenv').config();
 const mongoose = require('mongoose');
+const { GridFSBucket } = require('mongodb');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/skillbarter';
 const DRY_RUN = process.argv.includes('--dry-run');
 const INCLUDE_SEED = process.argv.includes('--include-seed');
+const GRIDFS_BUCKET = 'attachments';
 
 // Demo accounts created by seed.js when the database was first populated.
 // yash@example.com is listed first because it is the one most likely to belong
@@ -94,15 +96,36 @@ async function run() {
   doomed.forEach(u => console.log(`  - ${u.name || '(no name)'}  <${u.email}>`));
   console.log('');
 
+  const ids = doomed.map(u => u._id);
+  const inIds = { $in: ids };
+  const either = { $in: ids };
+
+  // Shared files are stored in GridFS, so the bytes have to be removed too.
+  // Deleting only the metadata rows would leave the real content behind in
+  // attachments.files and attachments.chunks forever.
+  const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: GRIDFS_BUCKET });
+  const sharedFiles = await coll('attachments')
+    .find({ $or: [{ uploadedBy: either }, { sharedWith: either }] })
+    .toArray();
+  const fileBytes = sharedFiles.reduce((total, a) => total + (a.size || 0), 0);
+
+  if (sharedFiles.length > 0) {
+    console.log(`Shared files to remove: ${sharedFiles.length} (${(fileBytes / 1024).toFixed(1)} KB in GridFS)`);
+    sharedFiles.forEach(a => console.log(`  - ${a.filename}  uploaded by ${a.uploadedBy}`));
+    console.log('');
+  }
+
   if (DRY_RUN) {
     console.log('Dry run only. Nothing was deleted. Re-run without --dry-run to apply.');
     await mongoose.disconnect();
     return;
   }
 
-  const ids = doomed.map(u => u._id);
-  const inIds = { $in: ids };
-  const either = { $in: ids };
+  for (const a of sharedFiles) {
+    await new Promise((resolve, reject) => {
+      bucket.delete(a.fileId, err => (err ? reject(err) : resolve()));
+    });
+  }
 
   const results = await Promise.all([
     coll('users').deleteMany({ _id: inIds }),
@@ -117,17 +140,19 @@ async function run() {
     coll('availabilities').deleteMany({ userId: either }),
     coll('userbadges').deleteMany({ userId: either }),
     coll('skilllistings').deleteMany({ userId: either }),
-    coll('helprequests').deleteMany({ userId: either })
+    coll('helprequests').deleteMany({ userId: either }),
+    coll('attachments').deleteMany({ _id: { $in: sharedFiles.map(a => a._id) } })
   ]);
 
   const labels = [
     'users', 'skills', 'requests', 'messages', 'sessions', 'notifications',
     'creditBalances', 'creditTransactions', 'reviews', 'availability',
-    'userBadges', 'listings', 'helpRequests'
+    'userBadges', 'listings', 'helpRequests', 'sharedFileMetadata'
   ];
 
   console.log('Deleted:');
   results.forEach((r, i) => console.log(`  ${labels[i]}: ${r.deletedCount}`));
+  console.log(`  sharedFileBytes (GridFS): ${fileBytes}`);
 
   const remaining = await coll('users').find({}).toArray();
   console.log(`\nRemaining accounts: ${remaining.length}`);
