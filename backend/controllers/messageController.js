@@ -1,5 +1,6 @@
 const Message = require('../models/Message');
 const Attachment = require('../models/Attachment');
+const attachmentController = require('./attachmentController');
 
 exports.sendMessage = async (req, res) => {
   try {
@@ -46,7 +47,6 @@ async function decorate(msg, req) {
   const plain = msg.toObject();
   if (!plain.attachmentId) return plain;
 
-  const attachmentController = require('./attachmentController');
   const attachment = await Attachment.findById(plain.attachmentId);
   if (attachment) {
     plain.attachment = {

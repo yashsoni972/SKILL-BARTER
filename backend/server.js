@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -68,6 +70,16 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Skill Barter API Server is running!' });
+});
+
+app.get('/api/app/version', require('./controllers/versionController').getAppVersion);
+
+app.get('/app/download', (req, res) => {
+  const apkPath = path.join(__dirname, '../skillbarter.apk');
+  if (fs.existsSync(apkPath)) {
+    return res.download(apkPath, 'skillbarter.apk');
+  }
+  res.status(404).json({ message: 'APK download file is not available on server.' });
 });
 
 const PORT = process.env.PORT || 5001;

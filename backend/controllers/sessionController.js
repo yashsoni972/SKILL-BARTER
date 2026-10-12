@@ -60,6 +60,8 @@ exports.completeSession = async (req, res) => {
       status: 'completed'
     });
 
+    await session.populate('hostUserId partnerUserId', 'name email location profileImage rating');
+
     const meUser = await User.findById(me);
     const partnerUser = await User.findById(partnerUserId);
 
@@ -168,6 +170,8 @@ exports.createSession = async (req, res) => {
       durationHours: 1,
       status: 'scheduled'
     });
+
+    await session.populate('hostUserId partnerUserId', 'name email location profileImage rating');
 
     const meUser = await User.findById(me);
     try {
