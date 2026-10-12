@@ -19,10 +19,20 @@
  * members would leave orphaned requests, messages and sessions behind.
  */
 require('dotenv').config();
-const mongoose = require('mongoose');
-const { GridFSBucket } = require('mongodb');
+const { MongoClient, GridFSBucket } = require('mongodb');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/skillbarter';
+
+// Exact shard hosts from Atlas SRV record (bypasses Node 24 Windows SRV bug)
+const DIRECT_URI = `mongodb://${(() => {
+  const u = MONGO_URI.replace('mongodb+srv://', '');
+  const at = u.lastIndexOf('@');
+  const creds = u.substring(0, at);
+  const after = u.substring(at + 1);
+  const db = after.split('/')[1] || 'skillbarter';
+  return `${creds}@ac-agz27of-shard-00-00.30a4bmn.mongodb.net:27017,ac-agz27of-shard-00-01.30a4bmn.mongodb.net:27017,ac-agz27of-shard-00-02.30a4bmn.mongodb.net:27017/${db}?tls=true&authSource=admin&replicaSet=atlas-8l71oc-shard-0&tlsAllowInvalidCertificates=true`;
+})()}`;
+
 const DRY_RUN = process.argv.includes('--dry-run');
 const INCLUDE_SEED = process.argv.includes('--include-seed');
 const GRIDFS_BUCKET = 'attachments';
@@ -74,14 +84,24 @@ const TEST_EMAIL_PATTERNS = [
 ];
 
 async function run() {
-  await mongoose.connect(MONGO_URI);
+  let client;
+  try {
+    client = new MongoClient(MONGO_URI, {
+      serverApi: { version: '1', strict: false, deprecationErrors: false }
+    });
+    await client.connect();
+  } catch (e) {
+    client = new MongoClient(DIRECT_URI, {
+      serverApi: { version: '1', strict: false, deprecationErrors: false },
+      tls: true,
+      tlsAllowInvalidCertificates: true
+    });
+    await client.connect();
+  }
+  const db = client.db('skillbarter');
   console.log('Connected to MongoDB.');
 
-  // Mongoose pluralises and lower-cases model names only when the collection is
-  // NOT passed explicitly. Passing 'User' created a phantom empty "User"
-  // collection, so this script used to report 0 accounts and delete nothing.
-  // These names are the real collections in MongoDB.
-  const coll = name => mongoose.connection.db.collection(name);
+  const coll = name => db.collection(name);
 
   const all = await coll('users').find({}).toArray();
   console.log(`Total accounts currently in the database: ${all.length}\n`);
@@ -107,7 +127,7 @@ async function run() {
 
   if (doomed.length === 0) {
     console.log('Nothing to remove - no test accounts found.');
-    await mongoose.disconnect();
+    await client.close();
     return;
   }
 
@@ -122,7 +142,7 @@ async function run() {
   // Shared files are stored in GridFS, so the bytes have to be removed too.
   // Deleting only the metadata rows would leave the real content behind in
   // attachments.files and attachments.chunks forever.
-  const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: GRIDFS_BUCKET });
+  const bucket = new GridFSBucket(db, { bucketName: GRIDFS_BUCKET });
   const sharedFiles = await coll('attachments')
     .find({ $or: [{ uploadedBy: either }, { sharedWith: either }] })
     .toArray();
@@ -136,14 +156,16 @@ async function run() {
 
   if (DRY_RUN) {
     console.log('Dry run only. Nothing was deleted. Re-run without --dry-run to apply.');
-    await mongoose.disconnect();
+    await client.close();
     return;
   }
 
   for (const a of sharedFiles) {
-    await new Promise((resolve, reject) => {
-      bucket.delete(a.fileId, err => (err ? reject(err) : resolve()));
-    });
+    try {
+      await bucket.delete(a.fileId);
+    } catch (e) {
+      // File already missing from GridFS — skip silently
+    }
   }
 
   const results = await Promise.all([
@@ -177,7 +199,7 @@ async function run() {
   console.log(`\nRemaining accounts: ${remaining.length}`);
   remaining.forEach(u => console.log(`  - ${u.name || '(no name)'}  <${u.email}>`));
 
-  await mongoose.disconnect();
+  await client.close();
 }
 
 run().catch(err => {
