@@ -43,12 +43,25 @@ const SEED_EMAILS = [
  * member: an unanchored pattern such as /^raj/i would also delete
  * rajesh.kumar@gmail.com.
  */
+// Real user names that must NEVER be deleted regardless of email pattern.
+const PROTECTED_NAMES = [
+  'yash', 'yash soni',
+  'het',
+  'raj',
+  'vikas',
+  'vraj',
+  'vanraj'
+];
+
 const TEST_EMAIL_PATTERNS = [
   /^e2ea\./i,
   /^e2eb\./i,
   /^e2e\./i,
+  /^e2e/i,
   /^shape\d*\./i,
   /^shape2?\./i,
+  /alice/i,
+  /^bob/i,
   /^zfa\./i,
   /^zfb\./i,
   /^fa\./i,
@@ -74,7 +87,13 @@ async function run() {
   console.log(`Total accounts currently in the database: ${all.length}\n`);
 
   const isSeed = u => SEED_EMAILS.includes(String(u.email || '').toLowerCase());
-  const isTest = u => TEST_EMAIL_PATTERNS.some(re => re.test(String(u.email || '')));
+  const isTest = u => {
+    const email = String(u.email || '');
+    const name = String(u.name || '').toLowerCase().trim();
+    // Never delete a real/protected user even if their email looks like a test
+    if (PROTECTED_NAMES.some(n => name === n || name.startsWith(n + ' '))) return false;
+    return TEST_EMAIL_PATTERNS.some(re => re.test(email));
+  };
 
   const doomed = all.filter(u => (INCLUDE_SEED ? isSeed(u) || isTest(u) : isTest(u)));
 

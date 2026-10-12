@@ -1,5 +1,6 @@
 package com.yashsoni.skillbarter.ui.chat;
 
+import android.graphics.PorterDuff;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ import com.yashsoni.skillbarter.data.model.Message;
 
 import java.util.List;
 
-/** Renders a chat bubble, showing an inline image or a file row when one is attached. */
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     public interface OnAttachmentClick {
@@ -46,26 +46,36 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messageList.get(position);
         Attachment attachment = message.getAttachment();
-
         boolean isOut = message.getSenderId() != null && message.getSenderId().equals(currentUserId);
 
+        android.content.Context ctx = holder.itemView.getContext();
+
         if (isOut) {
+            // Sent — indigo bubble, right aligned
             holder.container.setGravity(Gravity.END);
-            holder.bubble.setBackgroundResource(R.drawable.bg_hero_banner);
-            holder.textColor(holder.itemView.getContext().getColor(R.color.white));
-            holder.fileMetaColor(holder.itemView.getContext().getColor(R.color.primary_light));
+            holder.bubble.setBackgroundResource(R.drawable.bg_bubble_out);
+            holder.tvMessage.setTextColor(0xFFFFFFFF);
+            holder.tvMessage.setLinkTextColor(0xFFBFDBFE);
+            holder.tvTime.setTextColor(0xCCFFFFFF);
+            holder.tvFileName.setTextColor(0xFFFFFFFF);
+            holder.tvFileSize.setTextColor(0xCCFFFFFF);
+            holder.ivFileIcon.setColorFilter(0xFFFFFFFF, PorterDuff.Mode.SRC_IN);
         } else {
+            // Received — white bubble, left aligned
             holder.container.setGravity(Gravity.START);
-            holder.bubble.setBackgroundResource(R.drawable.bg_rounded_card);
-            holder.textColor(holder.itemView.getContext().getColor(R.color.text_primary));
-            holder.fileMetaColor(holder.itemView.getContext().getColor(R.color.text_secondary));
+            holder.bubble.setBackgroundResource(R.drawable.bg_bubble_in);
+            holder.tvMessage.setTextColor(0xFF0F172A);
+            holder.tvMessage.setLinkTextColor(0xFF4F46E5);
+            holder.tvTime.setTextColor(0xFF94A3B8);
+            holder.tvFileName.setTextColor(0xFF0F172A);
+            holder.tvFileSize.setTextColor(0xFF64748B);
+            holder.ivFileIcon.setColorFilter(0xFF4F46E5, PorterDuff.Mode.SRC_IN);
         }
 
-        // A file-only message must not leave an empty line where the text sits.
         String text = message.getMessage();
         boolean hasText = text != null && !text.trim().isEmpty();
         holder.tvMessage.setVisibility(hasText ? View.VISIBLE : View.GONE);
-        holder.tvMessage.setText(text);
+        if (hasText) holder.tvMessage.setText(text);
 
         holder.tvTime.setText(formatTime(message.getCreatedAt()));
 
@@ -109,14 +119,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             long millis = new java.util.Date(createdAt).getTime();
             return new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault()).format(new java.util.Date(millis));
         } catch (Exception e) {
-            return createdAt;
+            return "";
         }
     }
 
     static class MessageViewHolder extends RecyclerView.ViewHolder {
         LinearLayout container, bubble, layoutFileRow;
         TextView tvMessage, tvTime, tvFileName, tvFileSize;
-        ImageView ivAttachment;
+        ImageView ivAttachment, ivFileIcon;
 
         MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -128,15 +138,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             layoutFileRow = itemView.findViewById(R.id.layoutFileRow);
             tvFileName = itemView.findViewById(R.id.tvFileName);
             tvFileSize = itemView.findViewById(R.id.tvFileSize);
-        }
-
-        void textColor(int color) {
-            tvMessage.setTextColor(color);
-            tvFileName.setTextColor(color);
-        }
-
-        void fileMetaColor(int color) {
-            tvFileSize.setTextColor(color);
+            ivFileIcon = itemView.findViewById(R.id.ivFileIcon);
         }
     }
 }

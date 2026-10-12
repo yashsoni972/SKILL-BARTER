@@ -1,5 +1,6 @@
 package com.yashsoni.skillbarter.ui.home;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,19 +11,23 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.yashsoni.skillbarter.R;
 import com.yashsoni.skillbarter.data.model.User;
+import com.yashsoni.skillbarter.ui.profile.ProfileFragment;
 
 import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
-    private final List<User> userList;
-    private final OnUserClickListener listener;
-
     public interface OnUserClickListener {
         void onRequestClick(User user);
+        void onViewProfileClick(User user);
     }
+
+    private final List<User> userList;
+    private final OnUserClickListener listener;
 
     public UserAdapter(List<User> userList, OnUserClickListener listener) {
         this.userList = userList;
@@ -39,26 +44,69 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = userList.get(position);
+        Context ctx = holder.itemView.getContext();
+
         holder.tvName.setText(user.getName());
+        holder.tvLocation.setText(user.getLocation() != null ? "📍 " + user.getLocation() : "");
 
-        String skills = "";
-        if (user.getOfferedSkills() != null && !user.getOfferedSkills().isEmpty()) {
-            skills = String.join(" • ", user.getOfferedSkills());
-        } else {
-            skills = "Skill Exchange Member";
-        }
-        holder.tvSkills.setText(skills);
-        holder.tvLocation.setText("📍 " + user.getLocation());
+        // Rating
+        double rating = user.getRating();
+        holder.tvRating.setText(rating > 0 ? String.format("%.1f", rating) : "New");
 
+        // Avatar
         if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
-            holder.ivAvatar.setImageResource(com.yashsoni.skillbarter.ui.profile.ProfileFragment.getAvatarResource(user.getProfileImage()));
+            holder.ivAvatar.setImageResource(ProfileFragment.getAvatarResource(user.getProfileImage()));
+        } else {
+            holder.ivAvatar.setImageResource(R.drawable.ic_profile);
+        }
+
+        // Teaches chips
+        holder.chipGroupTeaches.removeAllViews();
+        List<String> offered = user.getOfferedSkills();
+        if (offered != null && !offered.isEmpty()) {
+            int max = Math.min(offered.size(), 3);
+            for (int i = 0; i < max; i++) {
+                holder.chipGroupTeaches.addView(makeChip(ctx, offered.get(i), true));
+            }
+        } else {
+            holder.chipGroupTeaches.addView(makeChip(ctx, "Not listed", false));
+        }
+
+        // Wants chips
+        holder.chipGroupWants.removeAllViews();
+        List<String> wanted = user.getWantedSkills();
+        if (wanted != null && !wanted.isEmpty()) {
+            int max = Math.min(wanted.size(), 3);
+            for (int i = 0; i < max; i++) {
+                holder.chipGroupWants.addView(makeChip(ctx, wanted.get(i), false));
+            }
+        } else {
+            holder.chipGroupWants.addView(makeChip(ctx, "Not listed", false));
         }
 
         holder.btnRequest.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onRequestClick(user);
-            }
+            if (listener != null) listener.onRequestClick(user);
         });
+
+        holder.btnViewProfile.setOnClickListener(v -> {
+            if (listener != null) listener.onViewProfileClick(user);
+        });
+    }
+
+    private Chip makeChip(Context ctx, String text, boolean filled) {
+        Chip chip = new Chip(ctx);
+        chip.setText(text);
+        chip.setClickable(false);
+        chip.setCheckable(false);
+        chip.setTextSize(11f);
+        if (filled) {
+            chip.setChipBackgroundColorResource(R.color.chip_selected_bg);
+            chip.setTextColor(ctx.getColor(R.color.primary));
+        } else {
+            chip.setChipBackgroundColorResource(R.color.chip_bg);
+            chip.setTextColor(ctx.getColor(R.color.text_secondary));
+        }
+        return chip;
     }
 
     @Override
@@ -67,17 +115,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvSkills, tvLocation;
+        TextView tvName, tvLocation, tvRating;
         ImageView ivAvatar;
-        Button btnRequest;
+        ChipGroup chipGroupTeaches, chipGroupWants;
+        Button btnRequest, btnViewProfile;
 
         UserViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvUserName);
-            tvSkills = itemView.findViewById(R.id.tvUserSkills);
             tvLocation = itemView.findViewById(R.id.tvUserLocation);
+            tvRating = itemView.findViewById(R.id.tvRating);
             ivAvatar = itemView.findViewById(R.id.ivAvatar);
+            chipGroupTeaches = itemView.findViewById(R.id.chipGroupTeaches);
+            chipGroupWants = itemView.findViewById(R.id.chipGroupWants);
             btnRequest = itemView.findViewById(R.id.btnRequest);
+            btnViewProfile = itemView.findViewById(R.id.btnViewProfile);
         }
     }
 }

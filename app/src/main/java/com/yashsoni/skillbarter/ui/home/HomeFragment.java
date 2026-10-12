@@ -137,10 +137,21 @@ public class HomeFragment extends Fragment {
                     binding.rvRecommended.setAdapter(null);
                     return;
                 }
-                UserAdapter adapter = new UserAdapter(users, user -> {
-                    Intent intent = new Intent(requireContext(), SendRequestActivity.class);
-                    intent.putExtra("targetUser", user);
-                    startActivity(intent);
+                UserAdapter adapter = new UserAdapter(users, new UserAdapter.OnUserClickListener() {
+                    @Override
+                    public void onRequestClick(User user) {
+                        Intent intent = new Intent(requireContext(), SendRequestActivity.class);
+                        intent.putExtra("targetUser", user);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onViewProfileClick(User user) {
+                        Intent intent = new Intent(requireContext(), SendRequestActivity.class);
+                        intent.putExtra("targetUser", user);
+                        intent.putExtra("viewOnly", true);
+                        startActivity(intent);
+                    }
                 });
                 binding.rvRecommended.setLayoutManager(new LinearLayoutManager(requireContext()));
                 binding.rvRecommended.setAdapter(adapter);
