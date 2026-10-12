@@ -3,7 +3,7 @@ package com.yashsoni.skillbarter.ui.chat;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Toast;
+import com.yashsoni.skillbarter.utils.SnackUtil;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -100,12 +100,6 @@ public class ChatActivity extends AppCompatActivity {
                     binding.etMessage.setText("");
                     loadMessages();
                 }
-
-                @Override
-                public void onError(String message) {
-                    binding.btnSend.setEnabled(true);
-                    Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
-                }
             });
         });
 
@@ -196,16 +190,16 @@ public class ChatActivity extends AppCompatActivity {
         java.io.File source = copyToCache(uri, name);
 
         if (source == null) {
-            Toast.makeText(this, "That file could not be read", Toast.LENGTH_LONG).show();
+            SnackUtil.show(this, "That file could not be read");
             return;
         }
         if (source.length() > MAX_UPLOAD_BYTES) {
-            Toast.makeText(this, "That file is larger than the 10 MB limit", Toast.LENGTH_LONG).show();
+            SnackUtil.show(this, "File is larger than the 10 MB limit");
             return;
         }
 
         binding.btnAttach.setEnabled(false);
-        Toast.makeText(this, "Uploading " + name, Toast.LENGTH_SHORT).show();
+        // uploading — no toast needed, button is disabled as visual feedback
 
         repository.uploadAttachment(source, mime == null ? "application/octet-stream" : mime, requestId, partnerUser.getId(),
                 new SkillBarterRepository.DataCallback<com.yashsoni.skillbarter.data.model.Attachment>() {
@@ -219,22 +213,6 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onError(String message) {
                         binding.btnAttach.setEnabled(true);
-                        Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
-
-    private void sendWithAttachment(String caption, String attachmentId) {
-        repository.sendMessageWithAttachment(partnerUser.getId(), caption, attachmentId,
-                new SkillBarterRepository.DataCallback<Message>() {
-                    @Override
-                    public void onSuccess(Message message) {
-                        binding.etMessage.setText("");
-                        loadMessages();
-                    }
-
-                    @Override
-                    public void onError(String message) {
                         Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
                     }
                 });
@@ -264,12 +242,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void startActivitySafely(Intent intent, String filename) {
+                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();(Intent intent, String filename) {
         try {
             startActivity(intent);
         } catch (Exception e) {

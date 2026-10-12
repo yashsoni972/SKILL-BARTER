@@ -2,7 +2,7 @@ package com.yashsoni.skillbarter.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
+import com.yashsoni.skillbarter.utils.SnackUtil;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,12 +50,11 @@ public class LoginActivity extends AppCompatActivity {
         String password = binding.etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+            SnackUtil.show(this, "Please enter email and password");
             return;
         }
 
         binding.btnLogin.setEnabled(false);
-        Toast.makeText(this, "Logging in with MongoDB cloud...", Toast.LENGTH_SHORT).show();
 
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
@@ -69,7 +68,6 @@ public class LoginActivity extends AppCompatActivity {
                     AuthResponse authRes = response.body();
                     User loggedInUser = authRes.getUser();
                     sessionManager.createLoginSession(authRes.getToken(), loggedInUser);
-                    Toast.makeText(LoginActivity.this, "Welcome Back, " + loggedInUser.getName() + "!", Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -82,14 +80,14 @@ public class LoginActivity extends AppCompatActivity {
                             errorMsg = response.errorBody().string();
                         }
                     } catch (Exception ignored) {}
-                    Toast.makeText(LoginActivity.this, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
+                    SnackUtil.showLong(LoginActivity.this, errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 binding.btnLogin.setEnabled(true);
-                Toast.makeText(LoginActivity.this, "Network error connecting to MongoDB Atlas: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                SnackUtil.showLong(LoginActivity.this, "Network error. Please check your connection.");
             }
         });
     }

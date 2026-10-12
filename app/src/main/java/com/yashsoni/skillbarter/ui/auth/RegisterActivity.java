@@ -2,7 +2,7 @@ package com.yashsoni.skillbarter.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
+import com.yashsoni.skillbarter.utils.SnackUtil;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,12 +50,11 @@ public class RegisterActivity extends AppCompatActivity {
         String location = binding.etLocation.getText().toString().trim();
 
         if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+            SnackUtil.show(this, "Please fill in all required fields");
             return;
         }
 
         binding.btnRegister.setEnabled(false);
-        Toast.makeText(this, "Registering account with MongoDB cloud...", Toast.LENGTH_SHORT).show();
 
         Map<String, String> body = new HashMap<>();
         body.put("name", name);
@@ -72,7 +71,6 @@ public class RegisterActivity extends AppCompatActivity {
                     AuthResponse authRes = response.body();
                     User registeredUser = authRes.getUser();
                     sessionManager.createLoginSession(authRes.getToken(), registeredUser);
-                    Toast.makeText(RegisterActivity.this, "🎉 Account Saved to MongoDB Atlas! Welcome " + registeredUser.getName(), Toast.LENGTH_LONG).show();
 
                     Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -85,14 +83,14 @@ public class RegisterActivity extends AppCompatActivity {
                             errorMsg = response.errorBody().string();
                         }
                     } catch (Exception ignored) {}
-                    Toast.makeText(RegisterActivity.this, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
+                    SnackUtil.showLong(RegisterActivity.this, errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 binding.btnRegister.setEnabled(true);
-                Toast.makeText(RegisterActivity.this, "Network error connecting to MongoDB Atlas: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                SnackUtil.showLong(RegisterActivity.this, "Network error. Please check your connection.");
             }
         });
     }

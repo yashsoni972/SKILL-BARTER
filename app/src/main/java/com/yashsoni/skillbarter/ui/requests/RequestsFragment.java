@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import com.yashsoni.skillbarter.utils.SnackUtil;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -145,12 +145,11 @@ public class RequestsFragment extends Fragment {
                         User other = request.getOtherUser(
                                 sessionManager.getUser() != null ? sessionManager.getUser().getId() : null);
                         if (other == null || other.getId() == null) {
-                            Toast.makeText(requireContext(), "Accepted, but this user has no id to chat with.", Toast.LENGTH_LONG).show();
+                            SnackUtil.show(getView(), "Accepted! But partner has no account id.");
                             refreshRequests();
                             return;
                         }
-
-                        Toast.makeText(requireContext(), "Exchange Accepted! Opening Chat...", Toast.LENGTH_SHORT).show();
+                        SnackUtil.show(getView(), "Exchange Accepted! Opening Chat...");
 
                         Intent intent = new Intent(requireContext(), ChatActivity.class);
                         intent.putExtra("partnerUser", other);
@@ -177,7 +176,7 @@ public class RequestsFragment extends Fragment {
                     @Override
                     public void onSuccess(ExchangeRequest data) {
                         if (!isAdded()) return;
-                        Toast.makeText(requireContext(), "Exchange Request Rejected", Toast.LENGTH_SHORT).show();
+                        SnackUtil.show(getView(), "Request Rejected");
                         refreshRequests();
                     }
 
@@ -209,8 +208,8 @@ public class RequestsFragment extends Fragment {
     }
 
     private void showError(String message) {
-        if (!isAdded()) return;
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+        if (!isAdded() || getView() == null) return;
+        SnackUtil.showLong(getView(), message);
     }
 
     @Override
