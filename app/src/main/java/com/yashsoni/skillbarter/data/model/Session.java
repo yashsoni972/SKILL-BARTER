@@ -1,5 +1,6 @@
 package com.yashsoni.skillbarter.data.model;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
@@ -7,7 +8,11 @@ public class Session implements Serializable {
     @SerializedName("_id")
     private String id;
     private String requestId;
+
+    @JsonAdapter(UserRefAdapter.class)
     private User hostUserId;
+
+    @JsonAdapter(UserRefAdapter.class)
     private User partnerUserId;
     private String skill;
     private String date;

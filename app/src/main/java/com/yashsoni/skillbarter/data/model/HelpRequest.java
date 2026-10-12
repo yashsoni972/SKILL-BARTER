@@ -1,5 +1,6 @@
 package com.yashsoni.skillbarter.data.model;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
@@ -7,6 +8,8 @@ public class HelpRequest implements Serializable {
 
     @SerializedName("_id")
     private String id;
+
+    @JsonAdapter(UserRefAdapter.class)
     private User userId;
     private String skillName;
     private String title;

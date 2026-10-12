@@ -1,5 +1,6 @@
 package com.yashsoni.skillbarter.data.model;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -16,6 +17,8 @@ public class ExchangeSummary implements Serializable {
 
     private String status;
     private String direction;
+
+    @JsonAdapter(UserRefAdapter.class)
     private User partner;
 
     private String taughtSkill;

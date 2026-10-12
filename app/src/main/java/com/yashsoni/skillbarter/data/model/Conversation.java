@@ -1,10 +1,12 @@
 package com.yashsoni.skillbarter.data.model;
 
+import com.google.gson.annotations.JsonAdapter;
 import java.io.Serializable;
 
 /** One row in the Chats tab: a partner you have an accepted exchange with. */
 public class Conversation implements Serializable {
 
+    @JsonAdapter(UserRefAdapter.class)
     private User partner;
     private String lastMessage;
     private String lastMessageAt;

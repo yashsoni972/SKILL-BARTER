@@ -207,7 +207,7 @@ public class ChatActivity extends AppCompatActivity {
         binding.btnAttach.setEnabled(false);
         Toast.makeText(this, "Uploading " + name, Toast.LENGTH_SHORT).show();
 
-        repository.uploadAttachment(source, mime == null ? "application/octet-stream" : mime, requestId,
+        repository.uploadAttachment(source, mime == null ? "application/octet-stream" : mime, requestId, partnerUser.getId(),
                 new SkillBarterRepository.DataCallback<com.yashsoni.skillbarter.data.model.Attachment>() {
                     @Override
                     public void onSuccess(com.yashsoni.skillbarter.data.model.Attachment attachment) {
@@ -254,8 +254,6 @@ public class ChatActivity extends AppCompatActivity {
                     PdfViewerActivity.start(ChatActivity.this, url, attachment.getFilename());
                 } else if (attachment.isImage()) {
                     Intent view = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    view.setDataAndType(Uri.parse(url), attachment.getMimeType());
-                    view.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivitySafely(view, attachment.getFilename());
                 } else {
                     Intent view = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

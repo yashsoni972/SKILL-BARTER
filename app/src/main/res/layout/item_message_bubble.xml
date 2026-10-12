@@ -56,6 +56,7 @@
                     android:singleLine="true"
                     android:text="notes.pdf"
                     android:textColor="@color/white"
+                    android:textIsSelectable="true"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -75,9 +76,13 @@
             android:id="@+id/tvMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:autoLink="all"
+            android:linksClickable="true"
             android:text="Hello!"
             android:textColor="@color/white"
+            android:textColorLink="@color/primary_light"
             android:textSize="14sp"
+            android:textIsSelectable="true"
             android:visibility="gone" />
 
         <TextView

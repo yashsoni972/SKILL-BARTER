@@ -2,6 +2,7 @@ package com.yashsoni.skillbarter.ui.profile;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
+import com.yashsoni.skillbarter.BuildConfig;
 import com.yashsoni.skillbarter.R;
+import com.yashsoni.skillbarter.data.model.AppVersion;
 import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
 import com.yashsoni.skillbarter.data.model.Credit;
@@ -68,6 +71,7 @@ public class ProfileFragment extends Fragment {
         binding.btnEditOffered.setOnClickListener(v -> openAddSkills(0));
         binding.btnEditWanted.setOnClickListener(v -> openAddSkills(1));
         binding.btnManageAvailability.setOnClickListener(v -> startActivity(new Intent(requireContext(), AvailabilityActivity.class)));
+        binding.btnCheckUpdates.setOnClickListener(v -> checkForAppUpdates());
 
         binding.btnLogout.setOnClickListener(v -> {
             sessionManager.logout();
@@ -284,6 +288,52 @@ public class ProfileFragment extends Fragment {
         Intent intent = new Intent(requireContext(), AddSkillsActivity.class);
         intent.putExtra("selectedTab", selectedTab);
         startActivity(intent);
+    }
+
+    private void checkForAppUpdates() {
+        if (binding == null) return;
+        Toast.makeText(requireContext(), "Checking for updates...", Toast.LENGTH_SHORT).show();
+
+        repository.checkAppUpdate(new SkillBarterRepository.DataCallback<AppVersion>() {
+            @Override
+            public void onSuccess(AppVersion version) {
+                if (binding == null || !isAdded()) return;
+
+                int currentVersionCode = BuildConfig.VERSION_CODE;
+                if (version != null && version.getVersionCode() > currentVersionCode) {
+                    showUpdateAvailableDialog(version);
+                } else {
+                    String msg = "SkillBarter is up to date (v" + BuildConfig.VERSION_NAME + ")";
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                if (binding == null || !isAdded()) return;
+                String msg = "SkillBarter is up to date (v" + BuildConfig.VERSION_NAME + ")";
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showUpdateAvailableDialog(AppVersion version) {
+        String notes = version.getNotes() != null && !version.getNotes().isEmpty()
+                ? version.getNotes()
+                : "A new update is available with improvements and fixes.";
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Update Available (v" + version.getVersionName() + ")")
+                .setMessage(notes + "\n\nWould you like to download and install the update now?")
+                .setPositiveButton("Update Now", (dialog, which) -> {
+                    String url = version.getApkUrl();
+                    if (url != null && !url.isEmpty()) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("Later", null)
+                .show();
     }
 
     @Override

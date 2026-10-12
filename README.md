@@ -220,6 +220,7 @@ skillbarter/
 
 ## 👨‍💻 Author & Credits
 
+<!-- cspell:words Yash Soni -->
 Developed by **Yash Soni**  
 - 📂 **GitHub**: [@yashsoni972](https://github.com/yashsoni972)
 - 📌 **Repository**: [https://github.com/yashsoni972/SKILL-BARTER](https://github.com/yashsoni972/SKILL-BARTER)

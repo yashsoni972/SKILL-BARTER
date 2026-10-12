@@ -1,6 +1,7 @@
 package com.yashsoni.skillbarter.api;
 
 import com.yashsoni.skillbarter.data.model.AuthResponse;
+import com.yashsoni.skillbarter.data.model.AppVersion;
 import com.yashsoni.skillbarter.data.model.Attachment;
 import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
@@ -163,4 +164,7 @@ public interface ApiService {
 
     @GET("badges")
     Call<List<Badge>> getBadges();
+
+    @GET("app/version")
+    Call<AppVersion> getAppVersion();
 }

@@ -3,6 +3,7 @@ package com.yashsoni.skillbarter.repository;
 import android.content.Context;
 import com.yashsoni.skillbarter.api.ApiClient;
 import com.yashsoni.skillbarter.api.ApiService;
+import com.yashsoni.skillbarter.data.model.AppVersion;
 import com.yashsoni.skillbarter.data.model.Attachment;
 import com.yashsoni.skillbarter.data.model.Availability;
 import com.yashsoni.skillbarter.data.model.Badge;
@@ -335,14 +336,24 @@ public class SkillBarterRepository {
      * Uploads a shared file. requestId may be null when there is no exchange
      * context; the server still needs one of the two to know who it is for.
      */
-    public void uploadAttachment(java.io.File file, String mimeType, String requestId, DataCallback<Attachment> callback) {
+    public void uploadAttachment(java.io.File file, String mimeType, String requestId, String partnerId, DataCallback<Attachment> callback) {
         okhttp3.MediaType parsed = okhttp3.MediaType.parse(mimeType == null ? "application/octet-stream" : mimeType);
         okhttp3.RequestBody body = okhttp3.RequestBody.create(file, parsed);
         okhttp3.MultipartBody.Part part = okhttp3.MultipartBody.Part.createFormData("file", file.getName(), body);
-        okhttp3.RequestBody id = okhttp3.RequestBody.create(
-                requestId == null ? "" : requestId, okhttp3.MediaType.parse("text/plain"));
 
-        apiService.uploadAttachment(part, id).enqueue(new Callback<Attachment>() {
+        okhttp3.MultipartBody.Builder builder = new okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM);
+        builder.addFormDataPart("file", file.getName(), okhttp3.RequestBody.create(file, parsed));
+        if (requestId != null && !requestId.isEmpty()) {
+            builder.addFormDataPart("requestId", requestId);
+        } else if (partnerId != null && !partnerId.isEmpty()) {
+            builder.addFormDataPart("sharedWith", partnerId);
+        }
+
+        okhttp3.RequestBody idPart = okhttp3.RequestBody.create(
+                requestId != null && !requestId.isEmpty() ? requestId : "",
+                okhttp3.MediaType.parse("text/plain"));
+
+        apiService.uploadAttachment(part, idPart).enqueue(new Callback<Attachment>() {
             @Override
             public void onResponse(Call<Attachment> call, Response<Attachment> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -755,6 +766,25 @@ public class SkillBarterRepository {
 
             @Override
             public void onFailure(Call<List<Review>> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    /** Fetches latest app version metadata to check for in-app updates. */
+    public void checkAppUpdate(DataCallback<AppVersion> callback) {
+        apiService.getAppVersion().enqueue(new Callback<AppVersion>() {
+            @Override
+            public void onResponse(Call<AppVersion> call, Response<AppVersion> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AppVersion> call, Throwable t) {
                 callback.onError(networkError(t));
             }
         });

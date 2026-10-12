@@ -442,6 +442,18 @@
 
         </RelativeLayout>
 
+        <!-- Check for Updates Button -->
+        <Button
+            android:id="@+id/btnCheckUpdates"
+            style="@style/Widget.SkillBarter.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:minHeight="48dp"
+            android:text="🔄 Check for Updates"
+            android:textColor="@color/primary"
+            android:textSize="14sp" />
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
