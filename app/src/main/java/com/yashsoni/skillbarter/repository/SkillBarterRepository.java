@@ -13,6 +13,7 @@ import com.yashsoni.skillbarter.data.model.ExchangeRelationship;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.ExchangeSummary;
 import com.yashsoni.skillbarter.data.model.HelpRequest;
+import com.yashsoni.skillbarter.data.model.LearningRoadmap;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
 import com.yashsoni.skillbarter.data.model.Notification;
@@ -839,6 +840,29 @@ public class SkillBarterRepository {
 
             @Override
             public void onFailure(Call<AppVersion> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    public void generateRoadmap(String currentSkill, String goal, String experience, DataCallback<LearningRoadmap> callback) {
+        Map<String, String> body = new HashMap<>();
+        body.put("currentSkill", currentSkill);
+        body.put("goal", goal);
+        body.put("experience", experience);
+
+        apiService.generateRoadmap(body).enqueue(new Callback<LearningRoadmap>() {
+            @Override
+            public void onResponse(Call<LearningRoadmap> call, Response<LearningRoadmap> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LearningRoadmap> call, Throwable t) {
                 callback.onError(networkError(t));
             }
         });

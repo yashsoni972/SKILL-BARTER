@@ -28,6 +28,7 @@ import com.yashsoni.skillbarter.databinding.FragmentProfileBinding;
 import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.auth.LoginActivity;
 import com.yashsoni.skillbarter.ui.availability.AvailabilityActivity;
+import com.yashsoni.skillbarter.ui.roadmap.RoadmapGeneratorActivity;
 import com.yashsoni.skillbarter.ui.badges.BadgeAdapter;
 import com.yashsoni.skillbarter.ui.credits.CreditsActivity;
 import com.yashsoni.skillbarter.ui.exchanges.ExchangesActivity;
@@ -72,6 +73,7 @@ public class ProfileFragment extends Fragment {
         binding.btnEditWanted.setOnClickListener(v -> openAddSkills(1));
         binding.btnManageAvailability.setOnClickListener(v -> startActivity(new Intent(requireContext(), AvailabilityActivity.class)));
         binding.btnCheckUpdates.setOnClickListener(v -> checkForAppUpdates());
+        binding.btnAiRoadmap.setOnClickListener(v -> startActivity(new Intent(requireContext(), RoadmapGeneratorActivity.class)));
 
         binding.btnLogout.setOnClickListener(v -> {
             sessionManager.logout();

@@ -10,6 +10,7 @@ import com.yashsoni.skillbarter.data.model.Conversation;
 import com.yashsoni.skillbarter.data.model.ExchangeRequest;
 import com.yashsoni.skillbarter.data.model.ExchangeSummary;
 import com.yashsoni.skillbarter.data.model.HelpRequest;
+import com.yashsoni.skillbarter.data.model.LearningRoadmap;
 import com.yashsoni.skillbarter.data.model.MatchResult;
 import com.yashsoni.skillbarter.data.model.Message;
 import com.yashsoni.skillbarter.data.model.Notification;
@@ -116,6 +117,9 @@ public interface ApiService {
 
     @POST("sessions/complete")
     Call<com.google.gson.JsonObject> completeSession(@Body Map<String, Object> body);
+
+    @POST("roadmap/generate")
+    Call<LearningRoadmap> generateRoadmap(@Body Map<String, String> body);
 
     @GET("sessions")
     Call<List<Session>> getSessions();

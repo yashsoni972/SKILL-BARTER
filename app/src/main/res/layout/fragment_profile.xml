@@ -352,6 +352,21 @@
                 android:textColor="@color/text_primary"
                 android:textSize="14sp" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_color" />
+
+            <TextView
+                android:id="@+id/btnAiRoadmap"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:text="🤖 AI Learning Roadmap →"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
         <!-- Hidden views needed by ProfileFragment logic -->

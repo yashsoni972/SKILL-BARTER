@@ -63,6 +63,7 @@ app.use('/api/availability', require('./routes/availabilityRoutes'));
 app.use('/api/credits', require('./routes/creditRoutes'));
 app.use('/api/badges', require('./routes/badgeRoutes'));
 app.use('/api/attachments', require('./routes/attachmentRoutes'));
+app.use('/api/roadmap', require('./routes/roadmapRoutes'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Skill Barter REST API Server. Exchange Skills, Not Money!' });
