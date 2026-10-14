@@ -1,14 +1,16 @@
 package com.yashsoni.skillbarter.ui.chat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import com.yashsoni.skillbarter.utils.SnackUtil;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.yashsoni.skillbarter.data.model.Attachment;
 import com.yashsoni.skillbarter.data.model.Message;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.databinding.ActivityChatBinding;
@@ -16,8 +18,12 @@ import com.yashsoni.skillbarter.repository.SkillBarterRepository;
 import com.yashsoni.skillbarter.ui.exchange.ExchangeDetailsActivity;
 import com.yashsoni.skillbarter.ui.schedule.ScheduleSessionActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
+import com.yashsoni.skillbarter.utils.SnackUtil;
 import com.yashsoni.skillbarter.utils.SystemBars;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,9 +65,6 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        // A user object without an id cannot address any API call, and letting
-        // that reach Retrofit produces the confusing
-        // 'Path parameter "userId" value must not be null' network error.
         if (partnerUser.getId() == null || partnerUser.getId().isEmpty()) {
             Toast.makeText(this, "This user has no account id. Please refresh and try again.", Toast.LENGTH_LONG).show();
             finish();
@@ -81,7 +84,23 @@ public class ChatActivity extends AppCompatActivity {
 
         messageList = new ArrayList<>();
         User currentUser = new SessionManager(this).getUser();
-        adapter = new MessageAdapter(messageList, currentUser != null ? currentUser.getId() : null, this::openAttachment);
+        adapter = new MessageAdapter(messageList, currentUser != null ? currentUser.getId() : null);
+
+        boolean iAmSender = "outgoing".equals(direction);
+        String mySkill = iAmSender ? offeredSkill : requestedSkill;
+        String theirSkill = iAmSender ? requestedSkill : offeredSkill;
+        binding.tvYouTeach.setText("You teach\n" + (mySkill != null && !mySkill.isEmpty() ? mySkill : "—"));
+        binding.tvYouLearn.setText("You learn\n" + (theirSkill != null && !theirSkill.isEmpty() ? theirSkill : "—"));
+
+        binding.layoutSkillBanner.setOnClickListener(v -> {
+            Intent intent = new Intent(ChatActivity.this, ExchangeDetailsActivity.class);
+            intent.putExtra("partnerUser", partnerUser);
+            intent.putExtra("requestId", requestId);
+            intent.putExtra("requestedSkill", requestedSkill);
+            intent.putExtra("offeredSkill", offeredSkill);
+            intent.putExtra("direction", direction);
+            startActivity(intent);
+        });
 
         binding.rvMessages.setLayoutManager(new LinearLayoutManager(this));
         binding.rvMessages.setAdapter(adapter);
@@ -100,16 +119,21 @@ public class ChatActivity extends AppCompatActivity {
                     binding.etMessage.setText("");
                     loadMessages();
                 }
+
+                @Override
+                public void onError(String message) {
+                    binding.btnSend.setEnabled(true);
+                    Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
+                }
             });
         });
 
-        // Agreeing a date and time is the point of this button, so it goes straight to
-        // the scheduling screen. Exchange details stay reachable from there.
         binding.btnSchedule.setOnClickListener(v -> {
             Intent intent = new Intent(ChatActivity.this, ScheduleSessionActivity.class);
             intent.putExtra("requestId", requestId);
             intent.putExtra("partnerName", partnerUser.getName());
-            intent.putExtra("skill", teachingOrLearning());
+            intent.putExtra("mySkill", mySkill);
+            intent.putExtra("theirSkill", theirSkill);
             startActivityForResult(intent, REQUEST_SCHEDULE);
         });
 
@@ -120,23 +144,10 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_SCHEDULE && resultCode == RESULT_OK) {
-            Toast.makeText(this, "Session scheduled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Session scheduled!", Toast.LENGTH_SHORT).show();
         } else if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             uploadPickedFile(data.getData());
         }
-    }
-
-    /**
-     * The skill this member is teaching in this exchange, falling back to the one
-     * they asked for. Used as the subject line for the booked session.
-     */
-    private String teachingOrLearning() {
-        boolean iAmSender = "outgoing".equals(direction);
-        String taught = iAmSender ? offeredSkill : requestedSkill;
-        String learned = iAmSender ? requestedSkill : offeredSkill;
-        if (taught != null && !taught.trim().isEmpty()) return taught;
-        if (learned != null && !learned.trim().isEmpty()) return learned;
-        return "Skill exchange";
     }
 
     private void loadMessages() {
@@ -158,7 +169,6 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    /** Opens the system file picker, limited to the formats the server accepts. */
     private void pickFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -179,15 +189,11 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Copies the chosen file into the cache, because a content:// uri is not a
-     * readable path and the upload needs real bytes.
-     */
     private void uploadPickedFile(Uri uri) {
         String mime = getContentResolver().getType(uri);
         String name = queryDisplayName(uri);
 
-        java.io.File source = copyToCache(uri, name);
+        File source = copyToCache(uri, name);
 
         if (source == null) {
             SnackUtil.show(this, "That file could not be read");
@@ -199,12 +205,11 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         binding.btnAttach.setEnabled(false);
-        // uploading — no toast needed, button is disabled as visual feedback
 
         repository.uploadAttachment(source, mime == null ? "application/octet-stream" : mime, requestId, partnerUser.getId(),
-                new SkillBarterRepository.DataCallback<com.yashsoni.skillbarter.data.model.Attachment>() {
+                new SkillBarterRepository.DataCallback<Attachment>() {
                     @Override
-                    public void onSuccess(com.yashsoni.skillbarter.data.model.Attachment attachment) {
+                    public void onSuccess(Attachment attachment) {
                         binding.btnAttach.setEnabled(true);
                         String caption = binding.etMessage.getText().toString().trim();
                         sendWithAttachment(caption, attachment.getId());
@@ -218,12 +223,22 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Images and PDFs open in the app; Word and Excel go to whichever app the
-     * phone has installed. A fresh link is minted because the one in the list may
-     * have expired.
-     */
-    private void openAttachment(com.yashsoni.skillbarter.data.model.Attachment attachment) {
+    private void sendWithAttachment(String text, String attachmentId) {
+        repository.sendMessageWithAttachment(partnerUser.getId(), text, attachmentId, new SkillBarterRepository.DataCallback<Message>() {
+            @Override
+            public void onSuccess(Message message) {
+                binding.etMessage.setText("");
+                loadMessages();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void openAttachment(Attachment attachment) {
         Toast.makeText(this, "Opening " + attachment.getFilename(), Toast.LENGTH_SHORT).show();
         repository.mintAttachmentLink(attachment.getId(), new SkillBarterRepository.DataCallback<String>() {
             @Override
@@ -242,7 +257,12 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();(Intent intent, String filename) {
+                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void startActivitySafely(Intent intent, String filename) {
         try {
             startActivity(intent);
         } catch (Exception e) {
@@ -250,8 +270,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    /** Shared with the PDF viewer so it can offer the same hand-off. */
-    static void openExternalFile(android.content.Context context, String url, String filename) {
+    static void openExternalFile(Context context, String url, String filename) {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -269,15 +288,14 @@ public class ChatActivity extends AppCompatActivity {
                 if (idx >= 0 && c.getString(idx) != null) name = c.getString(idx);
             }
         } catch (Exception ignored) {
-            // Some providers refuse to describe the file; the fallback name works.
         }
         return name;
     }
 
-    private java.io.File copyToCache(Uri uri, String name) {
-        java.io.File out = new java.io.File(getCacheDir(), "upload_" + System.currentTimeMillis() + "_" + name);
-        try (java.io.InputStream in = getContentResolver().openInputStream(uri);
-             java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
+    private File copyToCache(Uri uri, String name) {
+        File out = new File(getCacheDir(), "upload_" + System.currentTimeMillis() + "_" + name);
+        try (InputStream in = getContentResolver().openInputStream(uri);
+             FileOutputStream fos = new FileOutputStream(out)) {
             if (in == null) return null;
             byte[] buffer = new byte[8192];
             int read;

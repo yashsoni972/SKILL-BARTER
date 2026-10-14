@@ -71,13 +71,30 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
         holder.tvPartnerName.setText(partner != null && partner.getName() != null
                 ? partner.getName() : "Skill Exchange Partner");
         holder.tvSkills.setText(exchange.getSkillLine());
-        holder.tvStatus.setText(statusLabel(exchange));
+
+        // Status badge
+        if (exchange.isCompleted()) {
+            holder.tvStatus.setText("✓ Completed");
+            holder.tvStatus.setTextColor(0xFF00BFA5);
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_completed);
+        } else {
+            holder.tvStatus.setText("● Active");
+            holder.tvStatus.setTextColor(0xFF6C63FF);
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_active);
+        }
+
+        // Session date
+        String when = TimeFormat.date(exchange.getSessionDate());
+        if (when != null && !when.isEmpty()) {
+            holder.tvSessionDate.setVisibility(View.VISIBLE);
+            holder.tvSessionDate.setText("📅 " + when + (exchange.getSessionTime() != null ? "  🕐 " + exchange.getSessionTime() : ""));
+        } else {
+            holder.tvSessionDate.setVisibility(View.GONE);
+        }
 
         boolean rated = partner != null && partner.getId() != null
                 && reviewedUserIds.contains(partner.getId());
-        holder.btnRate.setText(rated ? R.string.exchanges_rated : R.string.exchanges_rate);
-
-        // Rating is only meaningful after a completed session, and only once.
+        holder.btnRate.setText(rated ? "Rated ✓" : "Rate ⭐");
         holder.btnRate.setEnabled(!rated && exchange.isCompleted());
         holder.btnChat.setEnabled(partner != null && partner.getId() != null);
 
@@ -87,23 +104,9 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
         holder.btnRate.setOnClickListener(v -> {
             if (listener != null) listener.onRate(exchange, partner);
         });
-
-        // Tapping the card itself opens the exchange details (date, medium,
-        // mark as completed).
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onDetails(exchange, partner);
         });
-    }
-
-    private String statusLabel(ExchangeSummary exchange) {
-        String when = TimeFormat.date(exchange.getSessionDate());
-        String medium = exchange.getSessionLocation() == null
-                ? "Online (Google Meet)" : exchange.getSessionLocation();
-
-        if (exchange.isCompleted()) {
-            return when.isEmpty() ? "Completed · " + medium : "Completed " + when + " · " + medium;
-        }
-        return when.isEmpty() ? "In progress · " + medium : "Scheduled " + when + " · " + medium;
     }
 
     @Override
@@ -112,17 +115,15 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView tvPartnerName;
-        final TextView tvSkills;
-        final TextView tvStatus;
-        final Button btnChat;
-        final Button btnRate;
+        final TextView tvPartnerName, tvSkills, tvStatus, tvSessionDate;
+        final Button btnChat, btnRate;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPartnerName = itemView.findViewById(R.id.tvPartnerName);
             tvSkills = itemView.findViewById(R.id.tvSkills);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvSessionDate = itemView.findViewById(R.id.tvSessionDate);
             btnChat = itemView.findViewById(R.id.btnChat);
             btnRate = itemView.findViewById(R.id.btnRate);
         }

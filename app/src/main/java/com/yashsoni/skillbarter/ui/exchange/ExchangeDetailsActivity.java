@@ -62,10 +62,13 @@ public class ExchangeDetailsActivity extends AppCompatActivity {
         }
 
         User currUser = new SessionManager(this).getUser();
+        boolean iAmSender = !"incoming".equals(direction);
         if (currUser != null) {
             binding.tvUser1Name.setText(currUser.getName());
+            binding.tvUser1Skill.setText(iAmSender ? offeredSkill : requestedSkill);
         }
         binding.tvUser2Name.setText(partnerUser.getName());
+        binding.tvUser2Skill.setText(iAmSender ? requestedSkill : offeredSkill);
 
         // Date, time and medium come from the stored session. They used to be
         // fixed strings ("Sat, 27 Sep 2026", "Online (Google Meet)") that were the

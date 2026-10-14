@@ -24,6 +24,7 @@ import com.yashsoni.skillbarter.data.model.Stats;
 import com.yashsoni.skillbarter.data.model.User;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,59 @@ public class SkillBarterRepository {
 
             @Override
             public void onFailure(Call<Stats> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    public void fetchProfile(DataCallback<User> callback) {
+        apiService.getProfile().enqueue(new Callback<com.google.gson.JsonObject>() {
+            @Override
+            public void onResponse(Call<com.google.gson.JsonObject> call, Response<com.google.gson.JsonObject> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    callback.onError(errorMessage(response));
+                    return;
+                }
+                com.google.gson.JsonObject body = response.body();
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                User user = gson.fromJson(body.get("user"), User.class);
+                if (user == null) { callback.onError("Invalid profile response"); return; }
+                // Attach skills from the separate arrays in the response
+                List<String> offered = new ArrayList<>();
+                List<String> wanted = new ArrayList<>();
+                if (body.has("offeredSkills") && body.get("offeredSkills").isJsonArray()) {
+                    for (com.google.gson.JsonElement e : body.getAsJsonArray("offeredSkills"))
+                        offered.add(e.getAsString());
+                }
+                if (body.has("wantedSkills") && body.get("wantedSkills").isJsonArray()) {
+                    for (com.google.gson.JsonElement e : body.getAsJsonArray("wantedSkills"))
+                        wanted.add(e.getAsString());
+                }
+                user.setOfferedSkills(offered);
+                user.setWantedSkills(wanted);
+                callback.onSuccess(user);
+            }
+
+            @Override
+            public void onFailure(Call<com.google.gson.JsonObject> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
+
+    public void updateSkillsBatch(Map<String, List<String>> body, DataCallback<Map<String, String>> callback) {
+        apiService.updateSkillsBatch(body).enqueue(new Callback<Map<String, String>>() {
+            @Override
+            public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, String>> call, Throwable t) {
                 callback.onError(networkError(t));
             }
         });

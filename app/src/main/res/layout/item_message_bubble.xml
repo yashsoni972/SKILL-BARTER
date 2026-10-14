@@ -4,103 +4,33 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="2dp"
+    android:layout_marginVertical="3dp"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/layoutBubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="4dp"
-        android:maxWidth="300dp"
+        android:maxWidth="270dp"
         android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="6dp">
+        android:paddingHorizontal="14dp"
+        android:paddingTop="9dp"
+        android:paddingBottom="7dp">
 
-        <!-- Image attachment -->
-        <ImageView
-            android:id="@+id/ivAttachment"
-            android:layout_width="220dp"
-            android:layout_height="160dp"
-            android:layout_marginBottom="4dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="Shared image"
-            android:scaleType="centerCrop"
-            android:visibility="gone" />
-
-        <!-- File row attachment -->
-        <LinearLayout
-            android:id="@+id/layoutFileRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/bg_file_row"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="8dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/ivFileIcon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:contentDescription="File"
-                android:src="@drawable/ic_attach" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvFileName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="middle"
-                    android:maxWidth="180dp"
-                    android:singleLine="true"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvFileSize"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="11sp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Message text -->
         <TextView
             android:id="@+id/tvMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:autoLink="all"
-            android:linksClickable="true"
-            android:textIsSelectable="true"
-            android:textSize="14sp"
-            android:visibility="gone" />
+            android:lineSpacingMultiplier="1.3"
+            android:textSize="14sp" />
 
-        <!-- Time row -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginTop="2dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tvTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="10sp" />
-
-        </LinearLayout>
+            android:layout_marginTop="4dp"
+            android:textSize="10sp" />
 
     </LinearLayout>
 

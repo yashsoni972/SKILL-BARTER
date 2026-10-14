@@ -5,7 +5,6 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,26 +18,18 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-/**
- * Lets both members agree when a session happens: day of week, date, and a start
- * and end time, plus the Google Meet room. Without this the only way to run a
- * session was to complete it immediately, so there was nothing to plan against.
- */
 public class ScheduleSessionActivity extends AppCompatActivity {
-
-    private static final String[] DAYS = {
-            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-    };
 
     private ActivityScheduleSessionBinding binding;
     private SkillBarterRepository repository;
 
-    private final Calendar startTime = Calendar.getInstance();
-    private final Calendar endTime = Calendar.getInstance();
-    private final Calendar chosenDate = Calendar.getInstance();
+    private final Calendar startCal = Calendar.getInstance();
+    private final Calendar endCal = Calendar.getInstance();
+    private final Calendar dateCal = Calendar.getInstance();
 
     private String requestId;
-    private String skill;
+    private String mySkill;
+    private String theirSkill;
     private String partnerName;
 
     @Override
@@ -52,111 +43,93 @@ public class ScheduleSessionActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             requestId = getIntent().getStringExtra("requestId");
-            skill = getIntent().getStringExtra("skill");
+            mySkill = getIntent().getStringExtra("mySkill");
+            theirSkill = getIntent().getStringExtra("theirSkill");
+            // legacy fallback
+            if (mySkill == null) mySkill = getIntent().getStringExtra("skill");
             partnerName = getIntent().getStringExtra("partnerName");
         }
 
-        // Without a request id the backend cannot work out who the partner is,
-        // so there is nothing sensible to schedule.
         if (TextUtils.isEmpty(requestId)) {
-            Toast.makeText(this, "No exchange to schedule. Open the exchange from Chats or My Exchanges.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No exchange to schedule.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
-        if (TextUtils.isEmpty(skill)) {
-            skill = "Skill exchange";
-        }
+        binding.tvMySkill.setText(mySkill != null && !mySkill.isEmpty() ? mySkill : "—");
+        binding.tvTheirSkill.setText(theirSkill != null && !theirSkill.isEmpty() ? theirSkill : "—");
 
-        binding.tvSubtitle.setText(partnerName == null || partnerName.isEmpty()
-                ? "Both members see the same slot. Sessions run on Google Meet."
-                : "Scheduling with " + partnerName + ". Both of you will see the same slot.");
+        // Default times: today 18:00 – 19:00
+        startCal.set(Calendar.HOUR_OF_DAY, 18);
+        startCal.set(Calendar.MINUTE, 0);
+        endCal.set(Calendar.HOUR_OF_DAY, 19);
+        endCal.set(Calendar.MINUTE, 0);
 
-        ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_dropdown_item, DAYS);
-        binding.spinnerDay.setAdapter(dayAdapter);
-        binding.spinnerDay.setSelection(todayIndex());
-
-        // Sensible starting values so the screen is never empty on open.
-        startTime.set(Calendar.HOUR_OF_DAY, 18);
-        startTime.set(Calendar.MINUTE, 0);
-        endTime.set(Calendar.HOUR_OF_DAY, 19);
-        endTime.set(Calendar.MINUTE, 0);
-
-        showDate();
-        showTimes();
+        refreshDateLabel();
+        refreshTimeLabels();
 
         binding.etDate.setOnClickListener(v -> pickDate());
-        binding.etStartTime.setOnClickListener(v -> pickTime(startTime, binding.etStartTime));
-        binding.etEndTime.setOnClickListener(v -> pickTime(endTime, binding.etEndTime));
-
+        binding.etStartTime.setOnClickListener(v -> pickTime(startCal, true));
+        binding.etEndTime.setOnClickListener(v -> pickTime(endCal, false));
+        binding.ivBack.setOnClickListener(v -> finish());
         binding.btnSave.setOnClickListener(v -> save());
     }
 
-    /** Monday-first index of today, matching the {@link #DAYS} order. */
-    private int todayIndex() {
-        int calDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK); // 1 = Sunday
-        return (calDay + 5) % 7;
-    }
-
     private void pickDate() {
-        DatePickerDialog dialog = new DatePickerDialog(
-                this,
-                (view, year, month, dayOfMonth) -> {
-                    chosenDate.set(year, month, dayOfMonth);
-                    showDate();
+        new DatePickerDialog(this,
+                (view, year, month, day) -> {
+                    dateCal.set(year, month, day);
+                    refreshDateLabel();
                 },
-                chosenDate.get(Calendar.YEAR),
-                chosenDate.get(Calendar.MONTH),
-                chosenDate.get(Calendar.DAY_OF_MONTH));
-        dialog.show();
+                dateCal.get(Calendar.YEAR),
+                dateCal.get(Calendar.MONTH),
+                dateCal.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    private void pickTime(Calendar target, android.widget.TextView label) {
-        TimePickerDialog dialog = new TimePickerDialog(
-                this,
-                (view, hourOfDay, minute) -> {
-                    target.set(Calendar.HOUR_OF_DAY, hourOfDay);
+    private void pickTime(Calendar target, boolean isStart) {
+        new TimePickerDialog(this,
+                (view, hour, minute) -> {
+                    target.set(Calendar.HOUR_OF_DAY, hour);
                     target.set(Calendar.MINUTE, minute);
-                    showTimes();
+                    refreshTimeLabels();
                 },
                 target.get(Calendar.HOUR_OF_DAY),
                 target.get(Calendar.MINUTE),
-                false);
-        dialog.show();
+                false).show();
     }
 
-    private void showDate() {
-        binding.etDate.setText(new SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault()).format(chosenDate.getTime()));
+    private void refreshDateLabel() {
+        binding.etDate.setText(new SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault()).format(dateCal.getTime()));
     }
 
-    private void showTimes() {
-        binding.etStartTime.setText(format(startTime));
-        binding.etEndTime.setText(format(endTime));
+    private void refreshTimeLabels() {
+        binding.etStartTime.setText(fmt(startCal));
+        binding.etEndTime.setText(fmt(endCal));
     }
 
-    private String format(Calendar c) {
+    private String fmt(Calendar c) {
         return String.format(Locale.getDefault(), "%02d:%02d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
     }
 
     private void save() {
-        if (endTime.before(startTime)) {
-            Toast.makeText(this, "The end time must be after the start time.", Toast.LENGTH_LONG).show();
+        if (endCal.before(startCal)) {
+            Toast.makeText(this, "End time must be after start time.", Toast.LENGTH_SHORT).show();
             return;
         }
-
         binding.btnSave.setEnabled(false);
 
-        String day = DAYS[binding.spinnerDay.getSelectedItemPosition()];
-        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(chosenDate.getTime());
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(dateCal.getTime());
+        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.US).format(dateCal.getTime());
         String meet = binding.etMeetLink.getText() == null ? "" : binding.etMeetLink.getText().toString().trim();
+        String skill = mySkill != null && !mySkill.isEmpty() ? mySkill : "Skill exchange";
 
-        repository.scheduleSession(requestId, skill, date, day,
-                format(startTime), format(endTime), meet,
+        repository.scheduleSession(requestId, skill, date, dayOfWeek,
+                fmt(startCal), fmt(endCal), meet,
                 new SkillBarterRepository.DataCallback<Session>() {
                     @Override
                     public void onSuccess(Session session) {
-                        Toast.makeText(ScheduleSessionActivity.this, "Session scheduled", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ScheduleSessionActivity.this,
+                                "Time proposed! Your partner will see it in Exchange Details.", Toast.LENGTH_LONG).show();
                         Intent result = new Intent();
                         result.putExtra("scheduled", true);
                         setResult(RESULT_OK, result);

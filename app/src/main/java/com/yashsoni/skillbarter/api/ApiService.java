@@ -44,7 +44,7 @@ public interface ApiService {
     Call<AuthResponse> login(@Body Map<String, String> body);
 
     @GET("users/profile")
-    Call<Map<String, Object>> getProfile();
+    Call<com.google.gson.JsonObject> getProfile();
 
     @PUT("users/profile")
     Call<User> updateProfile(@Body Map<String, String> body);

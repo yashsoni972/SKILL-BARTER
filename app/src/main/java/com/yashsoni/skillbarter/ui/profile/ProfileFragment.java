@@ -84,11 +84,28 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadUserData();
+        fetchProfileFromBackend();
         loadBadges();
         loadRequestCount();
         loadAvailabilitySummary();
         loadCreditBalance();
+    }
+
+    private void fetchProfileFromBackend() {
+        repository.fetchProfile(new SkillBarterRepository.DataCallback<User>() {
+            @Override
+            public void onSuccess(User user) {
+                if (binding == null) return;
+                sessionManager.updateUser(user);
+                loadUserData();
+            }
+
+            @Override
+            public void onError(String message) {
+                // Fall back to cached session data
+                loadUserData();
+            }
+        });
     }
 
     /** Shows the real balance on the Credits button instead of a fixed label. */
