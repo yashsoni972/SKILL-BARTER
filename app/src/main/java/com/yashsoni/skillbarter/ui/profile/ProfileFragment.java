@@ -37,7 +37,9 @@ import com.yashsoni.skillbarter.ui.skills.AddSkillsActivity;
 import com.yashsoni.skillbarter.utils.SessionManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileFragment extends Fragment {
 
@@ -64,6 +66,7 @@ public class ProfileFragment extends Fragment {
         loadUserData();
 
         binding.ivAvatar.setOnClickListener(v -> showAvatarPickerDialog());
+        binding.tvUserBio.setOnClickListener(v -> showEditBioDialog());
 
         binding.btnCredits.setOnClickListener(v -> startActivity(new Intent(requireContext(), CreditsActivity.class)));
         binding.btnProgress.setOnClickListener(v -> startActivity(new Intent(requireContext(), ProgressActivity.class)));
@@ -155,7 +158,25 @@ public class ProfileFragment extends Fragment {
                 sessionManager.updateUser(user);
                 loadUserData();
                 loadBadges();
-                Toast.makeText(requireContext(), "Profile avatar updated!", Toast.LENGTH_SHORT).show();
+
+                Map<String, String> body = new HashMap<>();
+                body.put("name", user.getName());
+                body.put("location", user.getLocation());
+                body.put("bio", user.getBio() != null ? user.getBio() : "");
+                body.put("profileImage", selectedAvatarKey);
+                repository.updateProfile(body, new SkillBarterRepository.DataCallback<User>() {
+                    @Override
+                    public void onSuccess(User updated) {
+                        sessionManager.updateUser(updated);
+                        loadUserData();
+                        Toast.makeText(requireContext(), "Profile avatar updated!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(requireContext(), "Avatar updated locally", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
             dialog.dismiss();
         };
@@ -168,6 +189,47 @@ public class ProfileFragment extends Fragment {
         iv6.setOnClickListener(avatarClickListener);
 
         dialog.show();
+    }
+
+    private void showEditBioDialog() {
+        User user = sessionManager.getUser();
+        if (user == null) return;
+
+        android.widget.EditText etBio = new android.widget.EditText(requireContext());
+        etBio.setText(user.getBio());
+        etBio.setHint("Enter your bio");
+        etBio.setPadding(40, 30, 40, 30);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Edit Bio")
+                .setView(etBio)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String newBio = etBio.getText().toString().trim();
+                    Map<String, String> body = new HashMap<>();
+                    body.put("name", user.getName());
+                    body.put("location", user.getLocation());
+                    body.put("bio", newBio);
+                    body.put("profileImage", user.getProfileImage() != null ? user.getProfileImage() : "avatar_1");
+
+                    repository.updateProfile(body, new SkillBarterRepository.DataCallback<User>() {
+                        @Override
+                        public void onSuccess(User updated) {
+                            sessionManager.updateUser(updated);
+                            loadUserData();
+                            Toast.makeText(requireContext(), "Bio updated successfully!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            user.setBio(newBio);
+                            sessionManager.updateUser(user);
+                            loadUserData();
+                            Toast.makeText(requireContext(), "Bio updated locally", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void loadUserData() {

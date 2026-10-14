@@ -1,19 +1,13 @@
-# Task List - AI Learning Roadmap Generator
+# Task List - Bug Fixes & Enhancements
 
-- [x] Backend implementation
-  - [x] Create `backend/controllers/roadmapController.js`
-  - [x] Create `backend/routes/roadmapRoutes.js`
-  - [x] Register roadmap route in `backend/server.js`
-- [x] Android Models & Networking
-  - [x] Create `RoadmapStep.java` and `LearningRoadmap.java`
-  - [x] Update `ApiService.java` with `generateRoadmap`
-  - [x] Update `SkillBarterRepository.java` with `generateRoadmap`
-- [x] Android UI Implementation
-  - [x] Create `item_roadmap_step.xml` and `activity_roadmap_generator.xml`
-  - [x] Create `RoadmapStepAdapter.java`
-  - [x] Create `RoadmapGeneratorActivity.java`
-  - [x] Register `RoadmapGeneratorActivity` in `AndroidManifest.xml`
-- [x] Verification & Build
-  - [x] Run backend syntax check (`node --check`)
-  - [x] Build Android app (`app:assembleDebug`)
-  - [x] Copy APK to root as `skillbarter.apk`
+- [ ] Backend fixes
+  - [ ] Update `backend/controllers/roadmapController.js` to remove missing `openai` module requirement (fixing 404/500 errors).
+- [ ] Android profile & avatar updates
+  - [ ] Update `ProfileFragment.java` to sync avatar selection with backend profile update.
+  - [ ] Add Bio Edit dialog in `ProfileFragment.java`.
+- [ ] App update check enhancement
+  - [ ] Enhance update check dialog in `ProfileFragment.java` to show update details and direct APK download link.
+- [ ] Verification & Build
+  - [ ] Run backend syntax check (`node --check`)
+  - [ ] Build Android app (`app:assembleDebug`)
+  - [ ] Copy APK to root as `skillbarter.apk`

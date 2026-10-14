@@ -867,4 +867,22 @@ public class SkillBarterRepository {
             }
         });
     }
+
+    public void updateProfile(Map<String, String> body, DataCallback<User> callback) {
+        apiService.updateProfile(body).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError(errorMessage(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                callback.onError(networkError(t));
+            }
+        });
+    }
 }

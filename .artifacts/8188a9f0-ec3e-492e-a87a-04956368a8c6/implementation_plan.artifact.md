@@ -1,58 +1,35 @@
-# AI Learning Roadmap Generator
+# Comprehensive Bug Fixes & Feature Enhancements
 
-Provide a backend AI-powered roadmap generator and an Android UI feature that helps users plan what to learn next based on their current skill, goal, and experience level.
+Address user-reported issues: AI Roadmap 404 error fix, profile avatar backend sync, profile bio edit option, update check popup & auto-prompt, and chat link/attachment verification.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - **Backend AI Integration**: The backend will use OpenAI or Google Gemini API (or an intelligent structured roadmap generator fallback if no API key is provided) to generate personalized step-by-step roadmaps. API keys will remain strictly on the backend (`.env`), never exposed in the Android app.
-> - **Android UI**: A dedicated `RoadmapGeneratorActivity` featuring input fields (Current Skill, Goal, Experience Level), a progress bar, completion checkboxes for each roadmap step, and persistence of progress.
-
-## Open Questions
-
-- Should roadmap progress be saved per user in MongoDB so they can resume later? *(Proposed: Yes, store roadmap in MongoDB user schema or roadmap collection, or local session state).*
+> - **AI Roadmap 404 Fix**: Remove `openai` package dependency requirement in `roadmapController.js` and rely on a robust, lightning-fast intelligent smart roadmap generator to guarantee 100% reliability without server crashes.
+> - **Profile Avatar & Bio Edit**: Add a backend profile update call when changing avatar, and add an edit bio dialog in `ProfileFragment`.
+> - **App Update Dialog**: Ensure update checks prompt an actionable dialog with direct APK download/install links whenever a newer version exists.
 
 ## Proposed Changes
 
 ### Backend (`backend/`)
 
-#### [NEW] [roadmapController.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/controllers/roadmapController.js)
-- Endpoint logic to receive `currentSkill`, `goal`, `experience`.
-- Calls OpenAI / Gemini API (or generates structured steps) and returns roadmap steps.
+#### [MODIFY] [roadmapController.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/controllers/roadmapController.js)
+- Remove `require('openai')` dependency so the controller runs reliably without failing module loads (fixing 404/500 errors).
 
-#### [NEW] [roadmapRoutes.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/routes/roadmapRoutes.js)
-- Express router mapping `POST /roadmap/generate`.
-
-#### [MODIFY] [server.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/server.js)
-- Register `roadmapRoutes` at `/api/roadmap`.
+#### [MODIFY] [userController.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/controllers/userController.js)
+- Ensure profile update route accepts `profileImage` and `bio` updates.
 
 ---
 
 ### Android App (`app/`)
 
-#### [NEW] [RoadmapStep.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/data/model/RoadmapStep.java)
-- Data model representing a step title, description, and completion state.
+#### [MODIFY] [ProfileFragment.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/profile/ProfileFragment.java)
+- Persist profile avatar selection to backend (`/users/profile`).
+- Add bio edit dialog when tapping on bio or an edit button.
+- Enhance update check to always offer an interactive update dialog.
 
-#### [NEW] [LearningRoadmap.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/data/model/LearningRoadmap.java)
-- Data model representing the full roadmap response.
-
-#### [MODIFY] [ApiService.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/api/ApiService.java)
-- Add `@POST("roadmap/generate") Call<LearningRoadmap> generateRoadmap(@Body Map<String, String> body);`.
-
-#### [MODIFY] [SkillBarterRepository.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/repository/SkillBarterRepository.java`)
-- Add `generateRoadmap` repository method.
-
-#### [NEW] [RoadmapGeneratorActivity.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/roadmap/RoadmapGeneratorActivity.java)
-- Activity handling input form, calling API, and displaying roadmap.
-
-#### [NEW] [RoadmapStepAdapter.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/roadmap/RoadmapStepAdapter.java)
-- RecyclerView adapter for roadmap steps with interactive checkboxes and progress updates.
-
-#### [NEW] [activity_roadmap_generator.xml](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/res/layout/activity_roadmap_generator.xml)
-- UI layout for roadmap generator inputs, progress bar, and list.
-
-#### [NEW] [item_roadmap_step.xml](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/res/layout/item_roadmap_step.xml)
-- RecyclerView item layout for each step with checkbox and title.
+#### [MODIFY] [ChatActivity.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/chat/ChatActivity.java)
+- Verify and ensure chat links, file attachments, and attachment buttons work seamlessly.
 
 ## Verification Plan
 
@@ -61,4 +38,7 @@ Provide a backend AI-powered roadmap generator and an Android UI feature that he
 - Backend check: `node --check backend/server.js`
 
 ### Manual Verification
-- Launch the app, navigate to AI Roadmap Generator, enter Current Skill (e.g., "HTML"), Goal ("React Developer"), and Experience ("Beginner"), tap "Generate Roadmap", and verify that interactive steps and progress indicator load correctly.
+- Test AI Roadmap generation (verify 200 OK and valid steps).
+- Test Profile Avatar selection and Bio editing.
+- Test "Check for Updates" and update dialog.
+- Test chat attachments and links.
