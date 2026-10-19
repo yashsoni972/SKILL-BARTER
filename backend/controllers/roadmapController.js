@@ -1,55 +1,93 @@
-const User = require('../models/User');
+async function generateGeminiRoadmap(currentSkill, goal, experience, apiKey) {
+    const prompt = `Create a practical, personalized learning roadmap for a ${experience} learner. They currently know "${currentSkill}" and want to learn "${goal}". Return a JSON object with a concise "title", a helpful "description", and a "steps" array. Each step must have a "title", a useful "description", and "completed": false.`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
-function generateSmartRoadmap(currentSkill, goal, experience) {
-    const steps = [
-        { title: `${currentSkill} refresher & core fundamentals`, description: `Review foundational concepts of ${currentSkill} and syntax best practices for a ${experience} level.`, completed: false },
-        { title: `Development environment & tooling setup`, description: `Configure your workspace, CLI tools, and dependencies required for ${goal}.`, completed: false },
-        { title: `Core principles & intermediate patterns`, description: `Master data flow, state management, and architectural patterns relevant to ${goal}.`, completed: false },
-        { title: `API integration & asynchronous programming`, description: `Learn how to fetch data from APIs, handle network errors, and manage asynchronous workflows.`, completed: false },
-        { title: `Advanced techniques & best practices`, description: `Explore optimization, component structuring, and robust error handling.`, completed: false },
-        { title: `Testing, debugging & quality assurance`, description: `Write unit tests and debug common issues to ensure production-ready code.`, completed: false },
-        { title: `Capstone Project: Build a real-world ${goal} application`, description: `Apply everything you've learned by planning, building, and finishing a complete capstone project.`, completed: false }
-    ];
+    try {
+        const response = await fetch(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': apiKey
+                },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { responseMimeType: 'application/json' }
+                }),
+                signal: controller.signal
+            }
+        );
 
-    return {
-        title: `Roadmap: ${currentSkill} ➔ ${goal}`,
-        description: `Personalized ${experience}-level learning path tailored to guide you from ${currentSkill} to ${goal}.`,
-        steps: steps
-    };
+        if (!response.ok) {
+            throw new Error(`Gemini API returned HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        const content = result.candidates?.[0]?.content?.parts
+            ?.map(part => part.text || '')
+            .join('')
+            .trim();
+
+        if (!content) {
+            throw new Error('Gemini returned an empty response');
+        }
+
+        const roadmap = JSON.parse(content);
+        if (
+            typeof roadmap.title !== 'string' ||
+            typeof roadmap.description !== 'string' ||
+            !Array.isArray(roadmap.steps) ||
+            roadmap.steps.length === 0 ||
+            !roadmap.steps.every(step =>
+                step &&
+                typeof step.title === 'string' &&
+                typeof step.description === 'string'
+            )
+        ) {
+            throw new Error('Gemini returned a roadmap with an invalid format');
+        }
+
+        roadmap.steps = roadmap.steps.map(step => ({
+            title: step.title,
+            description: step.description,
+            completed: false
+        }));
+        return roadmap;
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 exports.generateRoadmap = async (req, res) => {
     try {
-        const { currentSkill, goal, experience } = req.body;
-        if (!currentSkill || !goal) {
-            return res.status(400).json({ message: 'Current skill and goal are required' });
+        const { currentSkill, goal, experience } = req.body || {};
+        if (
+            typeof currentSkill !== 'string' ||
+            typeof goal !== 'string' ||
+            !currentSkill.trim() ||
+            !goal.trim() ||
+            currentSkill.length > 100 ||
+            goal.length > 100
+        ) {
+            return res.status(400).json({
+                message: 'Current skill and goal are required and must be 100 characters or fewer'
+            });
         }
 
-        const exp = experience || 'Beginner';
-
-        if (process.env.OPENAI_API_KEY) {
-            try {
-                const OpenAI = require('openai');
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-                const prompt = `Generate a structured learning roadmap for a ${exp} learner who currently knows "${currentSkill}" and wants to become a "${goal}". Return ONLY a valid JSON object with keys "title", "description", and "steps" (an array of objects with "title", "description", and boolean "completed": false).`;
-
-                const completion = await openai.chat.completions.create({
-                    model: "gpt-3.5-turbo",
-                    messages: [{ role: "user", content: prompt }],
-                    response_format: { type: "json_object" }
-                });
-
-                const parsed = JSON.parse(completion.choices[0].message.content);
-                return res.json(parsed);
-            } catch (aiErr) {
-                console.error('AI API error, falling back to smart generator:', aiErr.message);
-            }
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            return res.status(503).json({ message: 'AI roadmap generation is not configured on the server' });
         }
 
-        const roadmap = generateSmartRoadmap(currentSkill, goal, exp);
-        res.json(roadmap);
+        const exp = typeof experience === 'string' && experience.trim()
+            ? experience.trim()
+            : 'Beginner';
+        const roadmap = await generateGeminiRoadmap(currentSkill.trim(), goal.trim(), exp, apiKey);
+        return res.json(roadmap);
     } catch (err) {
-        console.error('Generate roadmap error:', err);
-        res.status(500).json({ message: 'Server error generating roadmap' });
+        console.error('Generate roadmap error:', err.message);
+        return res.status(502).json({ message: 'AI roadmap generation failed. Please try again later.' });
     }
 };
