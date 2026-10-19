@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_light"
-    android:padding="24dp">
+    android:background="#0F172A"
+    android:padding="28dp">
 
     <LinearLayout
+        android:id="@+id/layoutSplashContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -14,26 +15,31 @@
 
         <ImageView
             android:id="@+id/ivLogo"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:contentDescription="Logo"
             android:src="@drawable/ic_logo" />
 
         <TextView
+            android:id="@+id/tvAppName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Skill Barter"
-            android:textColor="@color/text_primary"
-            android:textSize="32sp"
+            android:layout_marginTop="20dp"
+            android:letterSpacing="0.05"
+            android:text="SkillBarter"
+            android:textColor="#FFFFFF"
+            android:textSize="34sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvAppTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/app_tagline"
-            android:textColor="@color/text_secondary"
-            android:textSize="16sp" />
+            android:letterSpacing="0.02"
+            android:text="Exchange Skills, Not Money"
+            android:textColor="#94A3B8"
+            android:textSize="15sp" />
 
     </LinearLayout>
 
@@ -41,9 +47,11 @@
         android:id="@+id/btnGetStarted"
         style="@style/Widget.SkillBarter.Button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="24dp"
-        android:text="Get Started" />
+        android:layout_marginBottom="32dp"
+        android:text="Get Started"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

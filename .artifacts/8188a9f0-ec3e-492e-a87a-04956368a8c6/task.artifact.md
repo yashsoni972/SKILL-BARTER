@@ -1,13 +1,9 @@
-# Task List - Bug Fixes & Enhancements
+# Task List - Custom Gallery Avatar Picker Fix
 
-- [ ] Backend fixes
-  - [ ] Update `backend/controllers/roadmapController.js` to remove missing `openai` module requirement (fixing 404/500 errors).
-- [ ] Android profile & avatar updates
-  - [ ] Update `ProfileFragment.java` to sync avatar selection with backend profile update.
-  - [ ] Add Bio Edit dialog in `ProfileFragment.java`.
-- [ ] App update check enhancement
-  - [ ] Enhance update check dialog in `ProfileFragment.java` to show update details and direct APK download link.
-- [ ] Verification & Build
-  - [ ] Run backend syntax check (`node --check`)
-  - [ ] Build Android app (`app:assembleDebug`)
-  - [ ] Copy APK to root as `skillbarter.apk`
+- [x] Custom Gallery Photo Picker
+  - [x] Wired up `btnUploadCustomPhoto` in `ProfileFragment.java` with gallery intent launcher.
+  - [x] Enabled Glide image loading for custom photo URIs.
+  - [x] Synced custom photo selection with backend.
+- [x] Build & Verification
+  - [x] Build Android app (`app:assembleDebug`)
+  - [x] Copy APK to root as `skillbarter.apk`

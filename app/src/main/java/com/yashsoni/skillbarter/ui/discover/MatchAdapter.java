@@ -47,8 +47,14 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
         MatchResult match = matchList.get(position);
         holder.tvName.setText(match.getName());
         holder.tvLocation.setText("📍 " + (match.getLocation() != null ? match.getLocation() : "Gujarat, India"));
-        holder.tvRating.setText(String.format("%.1f", match.getRating()));
-        holder.tvMatchPercentage.setText(match.getMatchPercentage() + "% 🔥");
+        double rating = match.getRating();
+        if (rating > 0) {
+            holder.tvRating.setVisibility(View.VISIBLE);
+            holder.tvRating.setText(String.format("%.1f", rating));
+        } else {
+            holder.tvRating.setVisibility(View.GONE);
+        }
+        holder.tvMatchPercentage.setVisibility(View.GONE);
 
         if (match.getProfileImage() != null && !match.getProfileImage().isEmpty()) {
             holder.ivProfile.setImageResource(ProfileFragment.getAvatarResource(match.getProfileImage()));

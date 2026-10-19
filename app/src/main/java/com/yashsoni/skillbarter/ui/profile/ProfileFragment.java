@@ -49,6 +49,46 @@ public class ProfileFragment extends Fragment {
     private int incomingRequestCount;
     private int outgoingRequestCount;
 
+    private final androidx.activity.result.ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
+            new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        try {
+                            requireContext().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } catch (Exception ignored) {}
+
+                        User user = sessionManager.getUser();
+                        if (user != null) {
+                            user.setProfileImage(uri.toString());
+                            sessionManager.updateUser(user);
+                            loadUserData();
+
+                            Map<String, String> body = new HashMap<>();
+                            body.put("name", user.getName());
+                            body.put("location", user.getLocation());
+                            body.put("bio", user.getBio() != null ? user.getBio() : "");
+                            body.put("profileImage", uri.toString());
+                            repository.updateProfile(body, new SkillBarterRepository.DataCallback<User>() {
+                                @Override
+                                public void onSuccess(User updated) {
+                                    sessionManager.updateUser(updated);
+                                    loadUserData();
+                                    Toast.makeText(requireContext(), "Profile photo updated!", Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    Toast.makeText(requireContext(), "Photo updated locally", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+    );
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -134,6 +174,23 @@ public class ProfileFragment extends Fragment {
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
+
+        android.widget.Button btnUpload = dialogView.findViewById(R.id.btnUploadCustomPhoto);
+        if (btnUpload != null) {
+            btnUpload.setOnClickListener(v -> {
+                dialog.dismiss();
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                try {
+                    pickImageLauncher.launch(intent);
+                } catch (Exception e) {
+                    Intent fallback = new Intent(Intent.ACTION_GET_CONTENT);
+                    fallback.setType("image/*");
+                    pickImageLauncher.launch(fallback);
+                }
+            });
+        }
 
         ImageView iv1 = dialogView.findViewById(R.id.ivAvatar1);
         ImageView iv2 = dialogView.findViewById(R.id.ivAvatar2);
@@ -241,7 +298,16 @@ public class ProfileFragment extends Fragment {
             binding.tvUserBio.setText("“" + user.getBio() + "”");
 
             if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
-                binding.ivAvatar.setImageResource(getAvatarResource(user.getProfileImage()));
+                if (user.getProfileImage().startsWith("content://") || user.getProfileImage().startsWith("file://")) {
+                    com.bumptech.glide.Glide.with(this)
+                            .load(Uri.parse(user.getProfileImage()))
+                            .circleCrop()
+                            .into(binding.ivAvatar);
+                } else {
+                    binding.ivAvatar.setImageResource(getAvatarResource(user.getProfileImage()));
+                }
+            } else {
+                binding.ivAvatar.setImageResource(R.drawable.ic_profile);
             }
 
             int offeredCount = (user.getOfferedSkills() != null) ? user.getOfferedSkills().size() : 0;

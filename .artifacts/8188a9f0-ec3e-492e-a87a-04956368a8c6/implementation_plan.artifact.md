@@ -1,44 +1,50 @@
-# Comprehensive Bug Fixes & Feature Enhancements
+# UI/UX & Feature Refinement Plan
 
-Address user-reported issues: AI Roadmap 404 error fix, profile avatar backend sync, profile bio edit option, update check popup & auto-prompt, and chat link/attachment verification.
+Refine app-wide UI/UX to ensure a clean, professional, WhatsApp-like chat experience, proper link clickability, professional attachment rendering, rating visibility rules, skill wrapping in cards, avatar picker styling, and removal of toyish emojis/badges.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - **AI Roadmap 404 Fix**: Remove `openai` package dependency requirement in `roadmapController.js` and rely on a robust, lightning-fast intelligent smart roadmap generator to guarantee 100% reliability without server crashes.
-> - **Profile Avatar & Bio Edit**: Add a backend profile update call when changing avatar, and add an edit bio dialog in `ProfileFragment`.
-> - **App Update Dialog**: Ensure update checks prompt an actionable dialog with direct APK download/install links whenever a newer version exists.
+> - **Chat WhatsApp Style**: Upgrade `item_message_bubble.xml` and `MessageAdapter.java` to support link auto-linking (clickable links opening instantly) and proper WhatsApp-like attachment/file preview cells.
+> - **Ratings & Badges**: Hide rating stars and match/fire percentages when users have zero ratings or matches.
+> - **Skills Wrapping**: Ensure user cards and profile cards handle 2+ skills gracefully without clipping or breaking layout.
+> - **Avatar Picker & Profile Bio**: Redesign `dialog_avatar_picker.xml` to look professional and modern, and fix bio layout formatting.
+> - **Professional Polish**: Remove emojis/toyish icons across cards for a clean, professional look.
 
 ## Proposed Changes
 
-### Backend (`backend/`)
+### Chat
+#### [MODIFY] [item_message_bubble.xml](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/res/layout/item_message_bubble.xml)
+- Add file/attachment preview container inside the chat bubble layout.
+- Add `android:autoLink="web"` to message text view.
 
-#### [MODIFY] [roadmapController.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/controllers/roadmapController.js)
-- Remove `require('openai')` dependency so the controller runs reliably without failing module loads (fixing 404/500 errors).
-
-#### [MODIFY] [userController.js](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/backend/controllers/userController.js)
-- Ensure profile update route accepts `profileImage` and `bio` updates.
+#### [MODIFY] [MessageAdapter.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/chat/MessageAdapter.java)
+- Enable link movement method for direct clickability.
+- Render attachment previews (file name / icon) if message has an attachment.
 
 ---
 
-### Android App (`app/`)
+### User Cards & Discovery
+#### [MODIFY] [item_user_card.xml](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/res/layout/item_user_card.xml) & [UserAdapter.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/home/UserAdapter.java)
+- Remove fire/match % badges.
+- Hide rating stars if rating is 0.
+- Support multiple skill chips wrapping cleanly.
 
-#### [MODIFY] [ProfileFragment.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/profile/ProfileFragment.java)
-- Persist profile avatar selection to backend (`/users/profile`).
-- Add bio edit dialog when tapping on bio or an edit button.
-- Enhance update check to always offer an interactive update dialog.
+---
 
-#### [MODIFY] [ChatActivity.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/chat/ChatActivity.java)
-- Verify and ensure chat links, file attachments, and attachment buttons work seamlessly.
+### Profile & Avatar Picker
+#### [MODIFY] [dialog_avatar_picker.xml](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/res/layout/dialog_avatar_picker.xml)
+- Modernize avatar grid with clean styling and professional colors.
+
+#### [MODIFY] [fragment_profile.xml](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/res/layout/fragment_profile.xml) & [ProfileFragment.java](file:///C:/Users/HP/AndroidStudioProjects/SkillBarter/app/src/main/java/com/yashsoni/skillbarter/ui/profile/ProfileFragment.java)
+- Clean up bio formatting and layout breakage.
 
 ## Verification Plan
 
 ### Automated Tests
 - Gradle build: `.\gradlew.bat app:assembleDebug`
-- Backend check: `node --check backend/server.js`
 
 ### Manual Verification
-- Test AI Roadmap generation (verify 200 OK and valid steps).
-- Test Profile Avatar selection and Bio editing.
-- Test "Check for Updates" and update dialog.
-- Test chat attachments and links.
+- Deploy and verify WhatsApp-style chat links and attachments.
+- Verify user cards show skills cleanly and hide unearned ratings/fire badges.
+- Verify avatar picker and profile bio layout.

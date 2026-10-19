@@ -17,10 +17,38 @@
         android:paddingTop="9dp"
         android:paddingBottom="7dp">
 
+        <LinearLayout
+            android:id="@+id/layoutAttachment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:background="@drawable/bg_file_row"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_attach" />
+
+            <TextView
+                android:id="@+id/tvAttachmentName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:ellipsize="middle"
+                android:maxWidth="180dp"
+                android:singleLine="true"
+                android:textSize="13sp" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tvMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:autoLink="web"
             android:lineSpacingMultiplier="1.3"
             android:textSize="14sp" />
 

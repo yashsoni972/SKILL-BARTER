@@ -84,7 +84,7 @@ public class ChatActivity extends AppCompatActivity {
 
         messageList = new ArrayList<>();
         User currentUser = new SessionManager(this).getUser();
-        adapter = new MessageAdapter(messageList, currentUser != null ? currentUser.getId() : null);
+        adapter = new MessageAdapter(messageList, currentUser != null ? currentUser.getId() : null, this::openAttachment);
 
         boolean iAmSender = "outgoing".equals(direction);
         String mySkill = iAmSender ? offeredSkill : requestedSkill;

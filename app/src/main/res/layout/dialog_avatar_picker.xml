@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Choose Your Profile Avatar"
+        android:text="Choose Profile Picture"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -20,63 +20,81 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="4dp"
-        android:text="Select an avatar to customize your profile"
+        android:text="Select a professional avatar or upload your custom photo"
         android:textColor="@color/text_secondary"
         android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/btnUploadCustomPhoto"
+        style="@style/Widget.SkillBarter.Button"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="16dp"
+        android:text="Upload Custom Photo"
+        android:textSize="14sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:text="Or choose a professional portrait:"
+        android:textColor="@color/text_muted"
+        android:textSize="12sp" />
 
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:columnCount="3"
         android:rowCount="2">
 
         <ImageView
             android:id="@+id/ivAvatar1"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/avatar_1" />
 
         <ImageView
             android:id="@+id/ivAvatar2"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/avatar_2" />
 
         <ImageView
             android:id="@+id/ivAvatar3"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/avatar_3" />
 
         <ImageView
             android:id="@+id/ivAvatar4"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/avatar_4" />
 
         <ImageView
             android:id="@+id/ivAvatar5"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/avatar_5" />
 
         <ImageView
             android:id="@+id/ivAvatar6"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/avatar_6" />
 

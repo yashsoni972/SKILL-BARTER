@@ -51,7 +51,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         // Rating
         double rating = user.getRating();
-        holder.tvRating.setText(rating > 0 ? String.format("%.1f", rating) : "New");
+        if (rating > 0) {
+            holder.tvRating.setVisibility(View.VISIBLE);
+            holder.tvRating.setText(String.format("%.1f", rating));
+        } else {
+            holder.tvRating.setVisibility(View.GONE);
+        }
 
         // Avatar
         if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
@@ -64,9 +69,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.chipGroupTeaches.removeAllViews();
         List<String> offered = user.getOfferedSkills();
         if (offered != null && !offered.isEmpty()) {
-            int max = Math.min(offered.size(), 3);
-            for (int i = 0; i < max; i++) {
-                holder.chipGroupTeaches.addView(makeChip(ctx, offered.get(i), true));
+            for (String s : offered) {
+                holder.chipGroupTeaches.addView(makeChip(ctx, s, true));
             }
         } else {
             holder.chipGroupTeaches.addView(makeChip(ctx, "Not listed", false));
@@ -76,9 +80,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.chipGroupWants.removeAllViews();
         List<String> wanted = user.getWantedSkills();
         if (wanted != null && !wanted.isEmpty()) {
-            int max = Math.min(wanted.size(), 3);
-            for (int i = 0; i < max; i++) {
-                holder.chipGroupWants.addView(makeChip(ctx, wanted.get(i), false));
+            for (String s : wanted) {
+                holder.chipGroupWants.addView(makeChip(ctx, s, false));
             }
         } else {
             holder.chipGroupWants.addView(makeChip(ctx, "Not listed", false));

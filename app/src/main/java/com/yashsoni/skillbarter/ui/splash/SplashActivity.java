@@ -36,8 +36,26 @@ public class SplashActivity extends AppCompatActivity {
             public void onFailure(retrofit2.Call<com.yashsoni.skillbarter.data.model.Stats> call, Throwable t) {}
         });
 
-        android.view.animation.Animation anim = android.view.animation.AnimationUtils.loadAnimation(this, com.yashsoni.skillbarter.R.anim.splash_scale);
-        binding.ivLogo.startAnimation(anim);
+        // High-end motion entrance animation
+        binding.ivLogo.setScaleX(0.3f);
+        binding.ivLogo.setScaleY(0.3f);
+        binding.ivLogo.setAlpha(0f);
+        binding.ivLogo.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .alpha(1f)
+                .setDuration(800)
+                .setInterpolator(new android.view.animation.OvershootInterpolator(1.2f))
+                .start();
+
+        binding.layoutSplashContent.setTranslationY(60f);
+        binding.layoutSplashContent.setAlpha(0f);
+        binding.layoutSplashContent.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(700)
+                .setStartDelay(200)
+                .start();
 
         binding.btnGetStarted.setOnClickListener(v -> navigateNext());
 
