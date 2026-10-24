@@ -8,22 +8,39 @@
     android:orientation="horizontal"
     android:padding="14dp">
 
-    <CheckBox
-        android:id="@+id/cbStep"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:buttonTint="@color/primary" />
+    <!-- Step number circle -->
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp">
 
+        <View
+            android:id="@+id/viewStepBg"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_step_number" />
+
+        <TextView
+            android:id="@+id/tvStepNumber"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+    </FrameLayout>
+
+    <!-- Text content -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/tvStepTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
             android:textSize="15sp"
@@ -31,12 +48,20 @@
 
         <TextView
             android:id="@+id/tvStepDesc"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
     </LinearLayout>
+
+    <!-- Checkbox -->
+    <CheckBox
+        android:id="@+id/cbStep"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:buttonTint="@color/accent_green" />
 
 </LinearLayout>

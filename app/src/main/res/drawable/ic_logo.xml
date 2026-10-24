@@ -1,39 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="96dp"
-    android:height="96dp"
-    android:viewportWidth="96"
-    android:viewportHeight="96">
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
 
-  <!-- Background Circle Glow -->
-  <path
-      android:pathData="M48,0A48,48 0,1 1,0,48 48,48 0,0 1,48,0Z">
-    <aapt:attr name="android:fillColor">
-      <gradient
-          android:startX="0"
-          android:startY="0"
-          android:endX="96"
-          android:endY="96"
-          android:type="linear">
-        <item android:offset="0.0" android:color="#4F46E5"/>
-        <item android:offset="1.0" android:color="#2563EB"/>
-      </gradient>
-    </aapt:attr>
-  </path>
+    <!-- Outer glow ring (soft) -->
+    <path
+        android:pathData="M54,4A50,50 0,1 1,4,54 50,50 0,0 1,54,4Z"
+        android:fillAlpha="0.18">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="4"
+                android:startY="4"
+                android:endX="104"
+                android:endY="104"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF"/>
+                <item android:offset="1.0" android:color="#A78BFA"/>
+            </gradient>
+        </aapt:attr>
+    </path>
 
-  <!-- Skill Arrow Top-Right -->
-  <path
-      android:fillColor="#FFFFFF"
-      android:pathData="M28,32 C28,26.477 32.477,22 38,22 L56,22 L48,14 L53.657,8.343 L73.314,28 L53.657,47.657 L48,42 L56,34 L38,34 C36.895,34 36,34.895 36,36 L36,44 L28,44 L28,32 Z"/>
+    <!-- Main background circle -->
+    <path
+        android:pathData="M54,10A44,44 0,1 1,10,54 44,44 0,0 1,54,10Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="10"
+                android:startY="10"
+                android:endX="98"
+                android:endY="98"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#7C3AED"/>
+                <item android:offset="0.5" android:color="#6C63FF"/>
+                <item android:offset="1.0" android:color="#0EA5E9"/>
+            </gradient>
+        </aapt:attr>
+    </path>
 
-  <!-- Skill Arrow Bottom-Left -->
-  <path
-      android:fillColor="#EEF2FF"
-      android:pathData="M68,64 C68,69.523 63.523,74 58,74 L40,74 L48,82 L42.343,87.657 L22.686,68 L42.343,48.343 L48,54 L40,62 L58,62 C59.105,62 60,61.105 60,60 L60,52 L68,52 L68,64 Z"/>
+    <!-- Inner highlight arc (top-left shimmer) -->
+    <path
+        android:pathData="M28,20 A34,34 0,0 1,62,16"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeAlpha="0.35"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round"/>
 
-  <!-- Center Exchange Spark Dot -->
-  <path
-      android:fillColor="#F59E0B"
-      android:pathData="M48,42 L50,48 L56,50 L50,52 L48,58 L46,52 L40,50 L46,48 Z"/>
+    <!-- Arrow UP-RIGHT (teach/offer) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,38 C32,33.582 35.582,30 40,30 L57,30 L50,23 L55,17.343 L72,34.343 L55,51.343 L50,45.686 L57,38.686 L57,42 L40,42 C38.895,42 38,42.895 38,44 L38,52 L32,52 Z"/>
+
+    <!-- Arrow DOWN-LEFT (learn/receive) -->
+    <path
+        android:fillColor="#E0F2FE"
+        android:fillAlpha="0.92"
+        android:pathData="M76,70 C76,74.418 72.418,78 68,78 L51,78 L58,85 L53,90.657 L36,73.657 L53,56.657 L58,62.314 L51,69.314 L51,66 L68,66 C69.105,66 70,65.105 70,64 L70,56 L76,56 Z"/>
+
+    <!-- Center exchange spark (4-point star) -->
+    <path
+        android:fillColor="#FCD34D"
+        android:pathData="M54,47 L56.5,53.5 L63,56 L56.5,58.5 L54,65 L51.5,58.5 L45,56 L51.5,53.5 Z"/>
+
+    <!-- Small dot accent top-right -->
+    <path
+        android:fillColor="#F9A8D4"
+        android:fillAlpha="0.85"
+        android:pathData="M78,26 A4,4 0,1 1,70,26 4,4 0,0 1,78,26Z"/>
+
+    <!-- Small dot accent bottom-left -->
+    <path
+        android:fillColor="#6EE7B7"
+        android:fillAlpha="0.85"
+        android:pathData="M38,82 A3,3 0,1 1,32,82 3,3 0,0 1,38,82Z"/>
 
 </vector>

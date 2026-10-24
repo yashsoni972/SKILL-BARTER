@@ -1,7 +1,9 @@
 package com.yashsoni.skillbarter.ui.roadmap;
 
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -34,49 +36,53 @@ public class RoadmapGeneratorActivity extends AppCompatActivity {
 
         binding.ivBack.setOnClickListener(v -> finish());
 
-        String[] experiences = new String[]{"Beginner", "Intermediate", "Advanced"};
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, experiences);
+        String[] experiences = {"Beginner", "Intermediate", "Advanced"};
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_dropdown_item, experiences);
         binding.spinnerExperience.setAdapter(spinnerAdapter);
 
         binding.btnGenerate.setOnClickListener(v -> {
-            String currentSkill = binding.etCurrentSkill.getText().toString().trim();
-            String goal = binding.etGoalSkill.getText().toString().trim();
-            String experience = binding.spinnerExperience.getSelectedItem().toString();
+            String current = binding.etCurrentSkill.getText().toString().trim();
+            String goal    = binding.etGoalSkill.getText().toString().trim();
+            String exp     = binding.spinnerExperience.getSelectedItem().toString();
 
-            if (currentSkill.isEmpty() || goal.isEmpty()) {
-                Toast.makeText(this, "Please enter both your current skill and goal", Toast.LENGTH_SHORT).show();
+            if (current.isEmpty() || goal.isEmpty()) {
+                Toast.makeText(this,
+                        "Please enter both your current skill and goal",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            generateRoadmap(currentSkill, goal, experience);
+            generateRoadmap(current, goal, exp);
         });
 
         binding.rvSteps.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void generateRoadmap(String currentSkill, String goal, String experience) {
-        binding.progressBar.setVisibility(View.VISIBLE);
+    private void generateRoadmap(String current, String goal, String exp) {
+        binding.layoutLoading.setVisibility(View.VISIBLE);
         binding.layoutResult.setVisibility(View.GONE);
         binding.btnGenerate.setEnabled(false);
 
-        repository.generateRoadmap(currentSkill, goal, experience, new SkillBarterRepository.DataCallback<LearningRoadmap>() {
-            @Override
-            public void onSuccess(LearningRoadmap roadmap) {
-                if (isFinishing() || isDestroyed() || binding == null) return;
-                binding.progressBar.setVisibility(View.GONE);
-                binding.btnGenerate.setEnabled(true);
-                currentRoadmap = roadmap;
-                displayRoadmap(roadmap);
-            }
+        repository.generateRoadmap(current, goal, exp,
+                new SkillBarterRepository.DataCallback<LearningRoadmap>() {
+                    @Override
+                    public void onSuccess(LearningRoadmap roadmap) {
+                        if (isFinishing() || isDestroyed() || binding == null) return;
+                        binding.layoutLoading.setVisibility(View.GONE);
+                        binding.btnGenerate.setEnabled(true);
+                        currentRoadmap = roadmap;
+                        displayRoadmap(roadmap);
+                    }
 
-            @Override
-            public void onError(String message) {
-                if (isFinishing() || isDestroyed() || binding == null) return;
-                binding.progressBar.setVisibility(View.GONE);
-                binding.btnGenerate.setEnabled(true);
-                Toast.makeText(RoadmapGeneratorActivity.this, message, Toast.LENGTH_LONG).show();
-            }
-        });
+                    @Override
+                    public void onError(String message) {
+                        if (isFinishing() || isDestroyed() || binding == null) return;
+                        binding.layoutLoading.setVisibility(View.GONE);
+                        binding.btnGenerate.setEnabled(true);
+                        Toast.makeText(RoadmapGeneratorActivity.this,
+                                message, Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void displayRoadmap(LearningRoadmap roadmap) {
@@ -87,6 +93,15 @@ public class RoadmapGeneratorActivity extends AppCompatActivity {
         adapter = new RoadmapStepAdapter(roadmap.getSteps(), this::updateProgress);
         binding.rvSteps.setAdapter(adapter);
         updateProgress();
+
+        // Entrance animation for result section
+        binding.layoutResult.setAlpha(0f);
+        binding.layoutResult.setTranslationY(30f);
+        binding.layoutResult.animate()
+                .alpha(1f).translationY(0f)
+                .setDuration(500)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
     }
 
     private void updateProgress() {
@@ -98,8 +113,22 @@ public class RoadmapGeneratorActivity extends AppCompatActivity {
             if (step.isCompleted()) completed++;
         }
 
-        binding.tvProgressLabel.setText("Progress: " + completed + " / " + total + " completed");
+        binding.tvProgressLabel.setText(completed + " / " + total + " completed");
         int percent = total > 0 ? (completed * 100) / total : 0;
-        binding.roadmapProgressBar.setProgress(percent);
+        binding.tvProgressPercent.setText(percent + "%");
+
+        // Animate progress bar smoothly
+        ObjectAnimator anim = ObjectAnimator.ofInt(
+                binding.roadmapProgressBar, "progress",
+                binding.roadmapProgressBar.getProgress(), percent);
+        anim.setDuration(400);
+        anim.setInterpolator(new DecelerateInterpolator());
+        anim.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 }

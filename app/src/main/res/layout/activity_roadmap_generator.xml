@@ -5,31 +5,58 @@
     android:background="@color/bg_light"
     android:orientation="vertical">
 
-    <!-- Top Bar -->
+    <!-- ── Top Bar ── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@color/surface_white"
-        android:elevation="3dp"
+        android:elevation="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp">
 
         <ImageView
             android:id="@+id/ivBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:contentDescription="Back"
+            android:padding="6dp"
             android:src="@drawable/ic_back" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="AI Learning Roadmap"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI Learning Roadmap"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Powered by Gemini AI"
+                android:textColor="@color/primary"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+        <!-- AI sparkle badge -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_hero_banner"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="✨ AI"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -39,27 +66,29 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:padding="16dp">
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp">
 
-            <!-- Input Card -->
+            <!-- ── Hero / Input Card ── -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_rounded_card"
+                android:background="@drawable/bg_roadmap_header"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Generate Your Path"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
+                    android:text="🗺️ Build Your Path"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -67,136 +96,175 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Enter what you know and where you want to go"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="#D8D4FF"
                     android:textSize="13sp" />
 
                 <EditText
                     android:id="@+id/etCurrentSkill"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="14dp"
-                    android:background="@drawable/bg_input_field"
-                    android:hint="Current Skill (e.g., HTML, Python)"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_roadmap_input_card"
+                    android:hint="Current Skill  (e.g. HTML, Python)"
                     android:inputType="textCapWords"
-                    android:paddingHorizontal="14dp"
+                    android:paddingHorizontal="16dp"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_muted"
+                    android:textColorHint="#A0AABF"
                     android:textSize="14sp" />
 
                 <EditText
                     android:id="@+id/etGoalSkill"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_input_field"
-                    android:hint="Goal Skill/Role (e.g., React Developer)"
+                    android:background="@drawable/bg_roadmap_input_card"
+                    android:hint="Goal / Role  (e.g. React Developer)"
                     android:inputType="textCapWords"
-                    android:paddingHorizontal="14dp"
+                    android:paddingHorizontal="16dp"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_muted"
+                    android:textColorHint="#A0AABF"
                     android:textSize="14sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="14dp"
                     android:text="Experience Level"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textColor="#D8D4FF"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <Spinner
                     android:id="@+id/spinnerExperience"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_input_field"
-                    android:paddingHorizontal="10dp" />
+                    android:background="@drawable/bg_roadmap_input_card"
+                    android:paddingHorizontal="12dp" />
 
                 <Button
                     android:id="@+id/btnGenerate"
-                    style="@style/Widget.SkillBarter.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="16dp"
-                    android:text="Generate AI Roadmap"
-                    android:textSize="15sp" />
+                    android:layout_height="52dp"
+                    android:layout_marginTop="18dp"
+                    android:background="#FFFFFFFF"
+                    android:text="✨  Generate My Roadmap"
+                    android:textColor="@color/primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:stateListAnimator="@null"
+                    android:elevation="0dp" />
 
             </LinearLayout>
 
-            <!-- Loading indicator -->
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
+            <!-- ── Loading ── -->
+            <LinearLayout
+                android:id="@+id/layoutLoading"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp"
-                android:visibility="gone" />
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-            <!-- Roadmap Result Container -->
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="AI is building your personalized path…"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <!-- ── Roadmap Result ── -->
             <LinearLayout
                 android:id="@+id/layoutResult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/tvRoadmapTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvRoadmapDesc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-
-                <!-- Progress Header -->
+                <!-- Result header card -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:background="@drawable/bg_rounded_card"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/tvProgressLabel"
-                        android:layout_width="0dp"
+                        android:id="@+id/tvRoadmapTitle"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Progress: 0 / 0 completed"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvRoadmapDesc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+
+                    <!-- Progress row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvProgressLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0 / 0 completed"
+                            android:textColor="@color/primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvProgressPercent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
 
                     <ProgressBar
                         android:id="@+id/roadmapProgressBar"
                         style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="120dp"
-                        android:layout_height="8dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp"
+                        android:layout_marginTop="8dp"
                         android:max="100"
-                        android:progressDrawable="@drawable/bg_rounded_card" />
+                        android:progressDrawable="@drawable/bg_progress_track" />
 
                 </LinearLayout>
 
+                <!-- Steps list -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSteps"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="14dp"
                     android:nestedScrollingEnabled="false" />
 
             </LinearLayout>
 
         </LinearLayout>
-
     </ScrollView>
 
 </LinearLayout>
