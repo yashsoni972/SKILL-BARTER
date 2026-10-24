@@ -254,6 +254,16 @@
 
                 </LinearLayout>
 
+                <!-- Share button -->
+                <Button
+                    android:id="@+id/btnShareRoadmap"
+                    style="@style/Widget.SkillBarter.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="14dp"
+                    android:text="📤  Share Roadmap"
+                    android:textSize="14sp" />
+
                 <!-- Steps list -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSteps"

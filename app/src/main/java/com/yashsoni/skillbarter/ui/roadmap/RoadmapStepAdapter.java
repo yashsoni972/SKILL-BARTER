@@ -1,6 +1,8 @@
 package com.yashsoni.skillbarter.ui.roadmap;
 
+import android.content.Intent;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,60 +32,92 @@ public class RoadmapStepAdapter extends RecyclerView.Adapter<RoadmapStepAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_roadmap_step, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
         RoadmapStep step = steps.get(position);
 
-        holder.tvStepNumber.setText(String.valueOf(position + 1));
-        holder.tvTitle.setText(step.getTitle());
-        holder.tvDesc.setText(step.getDescription());
+        h.tvStepNumber.setText(String.valueOf(position + 1));
+        h.tvTitle.setText(step.getTitle());
+        h.tvDesc.setText(step.getDescription());
 
-        // Resources section
+        // ── Estimated time badge ──────────────────────────────────────────────
+        if (step.getEstimatedTime() != null && !step.getEstimatedTime().isEmpty()) {
+            h.tvEstimatedTime.setVisibility(View.VISIBLE);
+            h.tvEstimatedTime.setText("⏱ " + step.getEstimatedTime());
+        } else {
+            h.tvEstimatedTime.setVisibility(View.GONE);
+        }
+
+        // ── Mini task ─────────────────────────────────────────────────────────
+        if (step.getMiniTask() != null && !step.getMiniTask().isEmpty()) {
+            h.layoutMiniTask.setVisibility(View.VISIBLE);
+            h.tvMiniTask.setText(step.getMiniTask());
+        } else {
+            h.layoutMiniTask.setVisibility(View.GONE);
+        }
+
+        // ── Resources ─────────────────────────────────────────────────────────
         List<String> resources = step.getResources();
         if (resources != null && !resources.isEmpty()) {
-            holder.layoutResources.setVisibility(View.VISIBLE);
+            h.layoutResources.setVisibility(View.VISIBLE);
             StringBuilder sb = new StringBuilder();
             for (String res : resources) {
                 sb.append("• ").append(res).append("\n");
             }
-            // Remove trailing newline
             if (sb.length() > 0) sb.setLength(sb.length() - 1);
-            holder.tvResources.setText(sb.toString());
+            h.tvResources.setText(sb.toString());
         } else {
-            holder.layoutResources.setVisibility(View.GONE);
+            h.layoutResources.setVisibility(View.GONE);
         }
 
-        applyCompletedStyle(holder, step.isCompleted());
+        // ── YouTube button ────────────────────────────────────────────────────
+        String ytQuery = step.getYoutubeSearch();
+        if (ytQuery != null && !ytQuery.isEmpty()) {
+            h.btnYoutube.setVisibility(View.VISIBLE);
+            h.btnYoutube.setOnClickListener(v -> {
+                String url = "https://www.youtube.com/results?search_query="
+                        + Uri.encode(ytQuery);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                v.getContext().startActivity(intent);
+            });
+        } else {
+            h.btnYoutube.setVisibility(View.GONE);
+        }
 
-        holder.cbStep.setOnCheckedChangeListener(null);
-        holder.cbStep.setChecked(step.isCompleted());
-        holder.cbStep.setOnCheckedChangeListener((btn, isChecked) -> {
+        // ── Completed state ───────────────────────────────────────────────────
+        applyCompletedStyle(h, step.isCompleted());
+
+        h.cbStep.setOnCheckedChangeListener(null);
+        h.cbStep.setChecked(step.isCompleted());
+        h.cbStep.setOnCheckedChangeListener((btn, isChecked) -> {
             step.setCompleted(isChecked);
-            applyCompletedStyle(holder, isChecked);
+            applyCompletedStyle(h, isChecked);
             if (onProgressChanged != null) onProgressChanged.run();
         });
     }
 
-    private void applyCompletedStyle(ViewHolder holder, boolean completed) {
-        if (completed) {
-            holder.viewStepBg.setBackgroundResource(R.drawable.bg_step_number_done);
-            holder.tvStepNumber.setTextColor(
-                    ContextCompat.getColor(holder.itemView.getContext(), R.color.white));
-            holder.tvTitle.setPaintFlags(holder.tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.tvTitle.setAlpha(0.5f);
-            holder.tvDesc.setAlpha(0.4f);
+    private void applyCompletedStyle(ViewHolder h, boolean done) {
+        if (done) {
+            h.viewStepBg.setBackgroundResource(R.drawable.bg_step_number_done);
+            h.tvStepNumber.setTextColor(
+                    ContextCompat.getColor(h.itemView.getContext(), R.color.white));
+            h.tvTitle.setPaintFlags(h.tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            h.tvTitle.setAlpha(0.5f);
+            h.tvDesc.setAlpha(0.4f);
+            h.layoutMiniTask.setAlpha(0.5f);
         } else {
-            holder.viewStepBg.setBackgroundResource(R.drawable.bg_step_number);
-            holder.tvStepNumber.setTextColor(
-                    ContextCompat.getColor(holder.itemView.getContext(), R.color.primary));
-            holder.tvTitle.setPaintFlags(holder.tvTitle.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.tvTitle.setAlpha(1f);
-            holder.tvDesc.setAlpha(1f);
+            h.viewStepBg.setBackgroundResource(R.drawable.bg_step_number);
+            h.tvStepNumber.setTextColor(
+                    ContextCompat.getColor(h.itemView.getContext(), R.color.primary));
+            h.tvTitle.setPaintFlags(h.tvTitle.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            h.tvTitle.setAlpha(1f);
+            h.tvDesc.setAlpha(1f);
+            h.layoutMiniTask.setAlpha(1f);
         }
     }
 
@@ -93,20 +127,24 @@ public class RoadmapStepAdapter extends RecyclerView.Adapter<RoadmapStepAdapter.
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View viewStepBg;
-        TextView tvStepNumber, tvTitle, tvDesc, tvResources;
-        LinearLayout layoutResources;
-        CheckBox cbStep;
+        View       viewStepBg;
+        TextView   tvStepNumber, tvTitle, tvDesc, tvEstimatedTime, tvMiniTask, tvResources;
+        LinearLayout layoutMiniTask, layoutResources, btnYoutube;
+        CheckBox   cbStep;
 
-        ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            viewStepBg      = itemView.findViewById(R.id.viewStepBg);
-            tvStepNumber    = itemView.findViewById(R.id.tvStepNumber);
-            tvTitle         = itemView.findViewById(R.id.tvStepTitle);
-            tvDesc          = itemView.findViewById(R.id.tvStepDesc);
-            layoutResources = itemView.findViewById(R.id.layoutResources);
-            tvResources     = itemView.findViewById(R.id.tvResources);
-            cbStep          = itemView.findViewById(R.id.cbStep);
+        ViewHolder(@NonNull View item) {
+            super(item);
+            viewStepBg      = item.findViewById(R.id.viewStepBg);
+            tvStepNumber    = item.findViewById(R.id.tvStepNumber);
+            tvTitle         = item.findViewById(R.id.tvStepTitle);
+            tvDesc          = item.findViewById(R.id.tvStepDesc);
+            tvEstimatedTime = item.findViewById(R.id.tvEstimatedTime);
+            layoutMiniTask  = item.findViewById(R.id.layoutMiniTask);
+            tvMiniTask      = item.findViewById(R.id.tvMiniTask);
+            layoutResources = item.findViewById(R.id.layoutResources);
+            tvResources     = item.findViewById(R.id.tvResources);
+            btnYoutube      = item.findViewById(R.id.btnWatchOnYoutube);
+            cbStep          = item.findViewById(R.id.cbStep);
         }
     }
 }

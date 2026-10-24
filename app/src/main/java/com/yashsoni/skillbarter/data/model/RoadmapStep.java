@@ -15,19 +15,40 @@ public class RoadmapStep implements Serializable {
     @SerializedName("completed")
     private boolean completed;
 
-    /** Optional list of resource links: "Label|URL" or just "Label" */
+    /** "1–2 weeks", "3–5 days", etc. */
+    @SerializedName("estimatedTime")
+    private String estimatedTime;
+
+    /** One small concrete practice task for this step. */
+    @SerializedName("miniTask")
+    private String miniTask;
+
+    /** YouTube search query string for this step. */
+    @SerializedName("youtubeSearch")
+    private String youtubeSearch;
+
+    /** "Label — URL" strings shown as bullet links. */
     @SerializedName("resources")
     private List<String> resources;
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle()                     { return title; }
+    public void   setTitle(String v)             { this.title = v; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDescription()               { return description; }
+    public void   setDescription(String v)       { this.description = v; }
 
-    public boolean isCompleted() { return completed; }
-    public void setCompleted(boolean completed) { this.completed = completed; }
+    public boolean isCompleted()                 { return completed; }
+    public void    setCompleted(boolean v)       { this.completed = v; }
 
-    public List<String> getResources() { return resources; }
-    public void setResources(List<String> resources) { this.resources = resources; }
+    public String getEstimatedTime()             { return estimatedTime; }
+    public void   setEstimatedTime(String v)     { this.estimatedTime = v; }
+
+    public String getMiniTask()                  { return miniTask; }
+    public void   setMiniTask(String v)          { this.miniTask = v; }
+
+    public String getYoutubeSearch()             { return youtubeSearch; }
+    public void   setYoutubeSearch(String v)     { this.youtubeSearch = v; }
+
+    public List<String> getResources()           { return resources; }
+    public void         setResources(List<String> v) { this.resources = v; }
 }
