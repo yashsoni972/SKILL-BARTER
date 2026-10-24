@@ -1,17 +1,21 @@
 package com.yashsoni.skillbarter.ui.exchanges;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.yashsoni.skillbarter.R;
 import com.yashsoni.skillbarter.data.model.ExchangeSummary;
 import com.yashsoni.skillbarter.data.model.User;
+import com.yashsoni.skillbarter.ui.profile.ProfileFragment;
 import com.yashsoni.skillbarter.utils.TimeFormat;
 
 import java.util.ArrayList;
@@ -72,6 +76,22 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
                 ? partner.getName() : "Skill Exchange Partner");
         holder.tvSkills.setText(exchange.getSkillLine());
 
+        // Partner avatar
+        if (partner != null && partner.getProfileImage() != null && !partner.getProfileImage().isEmpty()) {
+            String img = partner.getProfileImage();
+            if (img.startsWith("content://") || img.startsWith("http://") || img.startsWith("https://")) {
+                Glide.with(holder.itemView.getContext())
+                        .load(img.startsWith("content://") ? Uri.parse(img) : img)
+                        .circleCrop()
+                        .placeholder(R.drawable.ic_profile)
+                        .into(holder.ivPartnerAvatar);
+            } else {
+                holder.ivPartnerAvatar.setImageResource(ProfileFragment.getAvatarResource(img));
+            }
+        } else {
+            holder.ivPartnerAvatar.setImageResource(R.drawable.ic_profile);
+        }
+
         // Status badge
         if (exchange.isCompleted()) {
             holder.tvStatus.setText("✓ Completed");
@@ -116,10 +136,12 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView tvPartnerName, tvSkills, tvStatus, tvSessionDate;
+        final ImageView ivPartnerAvatar;
         final Button btnChat, btnRate;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
+            ivPartnerAvatar = itemView.findViewById(R.id.ivPartnerAvatar);
             tvPartnerName = itemView.findViewById(R.id.tvPartnerName);
             tvSkills = itemView.findViewById(R.id.tvSkills);
             tvStatus = itemView.findViewById(R.id.tvStatus);

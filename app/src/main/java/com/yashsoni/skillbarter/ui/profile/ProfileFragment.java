@@ -108,7 +108,7 @@ public class ProfileFragment extends Fragment {
         binding.ivAvatar.setOnClickListener(v -> showAvatarPickerDialog());
         binding.tvUserBio.setOnClickListener(v -> showEditBioDialog());
 
-        binding.btnCredits.setOnClickListener(v -> startActivity(new Intent(requireContext(), CreditsActivity.class)));
+        binding.rowCredits.setOnClickListener(v -> startActivity(new Intent(requireContext(), CreditsActivity.class)));
         binding.btnProgress.setOnClickListener(v -> startActivity(new Intent(requireContext(), ProgressActivity.class)));
         binding.btnMyExchanges.setOnClickListener(v -> startActivity(new Intent(requireContext(), ExchangesActivity.class)));
 
@@ -153,13 +153,13 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    /** Shows the real balance on the Credits button instead of a fixed label. */
+    /** Shows the real balance on the Credits row instead of a fixed label. */
     private void loadCreditBalance() {
         repository.fetchCredits(new SkillBarterRepository.DataCallback<Credit>() {
             @Override
             public void onSuccess(Credit credit) {
                 if (binding == null) return;
-                binding.btnCredits.setText(getString(R.string.credits_balance_format, credit.getBalance()));
+                binding.btnCredits.setText("Credits  · " + getString(R.string.credits_balance_format, credit.getBalance()));
             }
 
             @Override
@@ -175,7 +175,7 @@ public class ProfileFragment extends Fragment {
                 .setView(dialogView)
                 .create();
 
-        android.widget.Button btnUpload = dialogView.findViewById(R.id.btnUploadCustomPhoto);
+        View btnUpload = dialogView.findViewById(R.id.btnUploadCustomPhoto);
         if (btnUpload != null) {
             btnUpload.setOnClickListener(v -> {
                 dialog.dismiss();

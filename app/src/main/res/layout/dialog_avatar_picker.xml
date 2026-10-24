@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Choose Profile Picture"
+        android:text="Choose Profile Photo"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -20,83 +20,147 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="4dp"
-        android:text="Select a professional avatar or upload your custom photo"
+        android:gravity="center"
+        android:text="Pick an avatar or upload your own photo from gallery"
         android:textColor="@color/text_secondary"
         android:textSize="13sp" />
 
-    <Button
-        android:id="@+id/btnUploadCustomPhoto"
-        style="@style/Widget.SkillBarter.Button"
+    <!-- Upload button -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="46dp"
+        android:layout_height="52dp"
         android:layout_marginTop="16dp"
-        android:text="Upload Custom Photo"
-        android:textSize="14sp" />
+        android:background="@drawable/bg_roadmap_header"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:id="@+id/btnUploadCustomPhoto"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📁  Upload from Gallery"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
-        android:text="Or choose a professional portrait:"
+        android:layout_marginTop="18dp"
+        android:text="— Or choose an avatar —"
         android:textColor="@color/text_muted"
         android:textSize="12sp" />
 
+    <!-- Avatar grid 3×2 -->
     <GridLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
         android:columnCount="3"
-        android:rowCount="2">
+        android:rowCount="2"
+        android:useDefaultMargins="true">
 
-        <ImageView
-            android:id="@+id/ivAvatar1"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_margin="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/avatar_1" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill_horizontal"
+            android:padding="6dp">
+            <ImageView
+                android:id="@+id/ivAvatar1"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/avatar_1"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
 
-        <ImageView
-            android:id="@+id/ivAvatar2"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_margin="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/avatar_2" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill_horizontal"
+            android:padding="6dp">
+            <ImageView
+                android:id="@+id/ivAvatar2"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/avatar_2"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
 
-        <ImageView
-            android:id="@+id/ivAvatar3"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_margin="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/avatar_3" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill_horizontal"
+            android:padding="6dp">
+            <ImageView
+                android:id="@+id/ivAvatar3"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/avatar_3"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
 
-        <ImageView
-            android:id="@+id/ivAvatar4"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_margin="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/avatar_4" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill_horizontal"
+            android:padding="6dp">
+            <ImageView
+                android:id="@+id/ivAvatar4"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/avatar_4"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
 
-        <ImageView
-            android:id="@+id/ivAvatar5"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_margin="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/avatar_5" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill_horizontal"
+            android:padding="6dp">
+            <ImageView
+                android:id="@+id/ivAvatar5"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/avatar_5"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
 
-        <ImageView
-            android:id="@+id/ivAvatar6"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_margin="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/avatar_6" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill_horizontal"
+            android:padding="6dp">
+            <ImageView
+                android:id="@+id/ivAvatar6"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/avatar_6"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
 
     </GridLayout>
 

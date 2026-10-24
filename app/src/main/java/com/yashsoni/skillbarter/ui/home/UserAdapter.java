@@ -49,11 +49,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.tvName.setText(user.getName());
         holder.tvLocation.setText(user.getLocation() != null ? "📍 " + user.getLocation() : "");
 
-        // Rating
+        // Rating — show number inside badge; hide just the number TextView if no rating,
+        // but always keep the star emoji visible via the parent LinearLayout
         double rating = user.getRating();
         if (rating > 0) {
             holder.tvRating.setVisibility(View.VISIBLE);
-            holder.tvRating.setText(String.format("%.1f", rating));
+            holder.tvRating.setText(String.format(java.util.Locale.getDefault(), "%.1f", rating));
         } else {
             holder.tvRating.setVisibility(View.GONE);
         }
