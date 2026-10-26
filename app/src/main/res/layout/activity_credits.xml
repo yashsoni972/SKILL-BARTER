@@ -18,7 +18,7 @@
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:contentDescription="@string/credits_title"
-            android:src="@drawable/ic_logo" />
+            android:src="@drawable/ic_back" />
 
         <TextView
             android:layout_width="wrap_content"
